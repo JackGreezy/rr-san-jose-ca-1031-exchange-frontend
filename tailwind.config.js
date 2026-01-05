@@ -4,7 +4,7 @@ module.exports = {
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: { extend: {
     colors: {
-      paper: tokens.paper, ink: tokens.ink, heading: tokens.heading,
+      base: tokens.paper, text: tokens.ink, heading: tokens.heading,
       primary: tokens.primaryBg, primaryfg: tokens.primaryFg,
       secondary: tokens.secondaryBg, secondaryfg: tokens.secondaryFg,
       outline: tokens.outline, panel: tokens.panel
