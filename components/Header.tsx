@@ -2,57 +2,23 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { servicesData } from "../data/services";
 import { locationsData } from "../data/locations";
 import { LOCATIONS_ROUTE } from "../lib/config";
 
-const PRIMARY_CITY = "San Jose";
-const PRIMARY_STATE_ABBR = "CA";
+const phoneNumberDisplay = "(408) 539-2254";
+const phoneNumberHref = "tel:+14085392254";
 
-// Top services - prioritize property identification services
-const mainServiceSlugs = [
-  "replacement-property-identification",
-  "multifamily-property-search",
-  "industrial-property-discovery",
-  "retail-property-lists",
-  "nnn-lease-property-discovery",
-  "medical-office-identification",
-];
-
-const topServices = [
-  ...servicesData.filter((s) => mainServiceSlugs.includes(s.slug)).slice(0, 6),
-  ...servicesData.filter((s) => !mainServiceSlugs.includes(s.slug)).slice(0, 2),
-].slice(0, 8).map((s) => ({
+const topServices = servicesData.slice(0, 8).map((s) => ({
   title: s.name,
   slug: s.route,
 }));
 
-// Top locations - San Jose first, then most populous cities
-const topLocationSlugs = [
-  "san-jose-ca",
-  "palo-alto-ca",
-  "mountain-view-ca",
-  "sunnyvale-ca",
-  "santa-clara-ca",
-  "fremont-ca",
-  "milpitas-ca",
-  "hayward-ca",
-];
-
-const topLocations = locationsData
-  .filter((l) => topLocationSlugs.includes(l.slug))
-  .sort((a, b) => {
-    const aIndex = topLocationSlugs.indexOf(a.slug);
-    const bIndex = topLocationSlugs.indexOf(b.slug);
-    return aIndex - bIndex;
-  })
-  .slice(0, 8)
-  .map((l) => ({
-    title: l.name,
-    slug: l.route,
-  }));
+const topLocations = locationsData.slice(0, 8).map((l) => ({
+  title: l.name,
+  slug: l.route,
+}));
 
 const tools = [
   { name: "Boot Calculator", href: "/tools/boot-calculator" },
@@ -61,10 +27,10 @@ const tools = [
 ];
 
 export default function Header() {
-  const pathname = usePathname();
   const [servicesOpen, setServicesOpen] = useState(false);
   const [locationsOpen, setLocationsOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const servicesRef = useRef<HTMLDivElement>(null);
   const locationsRef = useRef<HTMLDivElement>(null);
   const toolsRef = useRef<HTMLDivElement>(null);
@@ -78,6 +44,7 @@ export default function Header() {
         setServicesOpen(false);
         setLocationsOpen(false);
         setToolsOpen(false);
+        setMobileMenuOpen(false);
       }
     };
     document.addEventListener("keydown", handleEscape);
@@ -93,7 +60,7 @@ export default function Header() {
     if (servicesTimeoutRef.current) clearTimeout(servicesTimeoutRef.current);
     servicesTimeoutRef.current = setTimeout(() => {
       setServicesOpen(false);
-    }, 500); // Increased timeout for better UX
+    }, 300);
   };
 
   const handleLocationsMouseEnter = () => {
@@ -105,7 +72,7 @@ export default function Header() {
     if (locationsTimeoutRef.current) clearTimeout(locationsTimeoutRef.current);
     locationsTimeoutRef.current = setTimeout(() => {
       setLocationsOpen(false);
-    }, 500); // Increased timeout for better UX
+    }, 300);
   };
 
   const handleToolsMouseEnter = () => {
@@ -117,25 +84,25 @@ export default function Header() {
     if (toolsTimeoutRef.current) clearTimeout(toolsTimeoutRef.current);
     toolsTimeoutRef.current = setTimeout(() => {
       setToolsOpen(false);
-    }, 200);
+    }, 300);
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#E5E7EB] bg-white/95 backdrop-blur-sm">
-      <nav className="max-w-7xl mx-auto px-6 md:px-10" aria-label="Main navigation">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center hover:opacity-80 transition">
-            <Image
-              src="/1031-exchange-san-jose-logo.png"
-              alt="1031 Exchange San Jose Logo"
-              width={40}
-              height={40}
-              className="h-10 w-auto"
-              priority
-            />
+    <header className="sticky top-0 z-50 bg-navy">
+      <nav className="max-w-7xl mx-auto px-6 lg:px-10" aria-label="Main navigation">
+        <div className="flex h-20 items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition">
+            <div className="flex flex-col leading-tight">
+              <span className="font-heading text-2xl italic text-lime">1031</span>
+              <span className="text-[10px] font-medium tracking-[0.2em] text-white/90 italic">Exchange</span>
+              <span className="text-xs font-semibold tracking-wider text-white uppercase">San Jose</span>
+            </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-8">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-8">
+            {/* Services Dropdown */}
             <div
               ref={servicesRef}
               className="relative"
@@ -144,41 +111,52 @@ export default function Header() {
             >
               <button
                 type="button"
-                className="flex items-center gap-1 text-sm font-medium text-[#111827] hover:text-[#3B82F6] transition aria-expanded:text-[#3B82F6]"
+                className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-super-wide text-white hover:text-lime transition"
                 aria-expanded={servicesOpen}
                 aria-haspopup="true"
                 onClick={() => setServicesOpen(!servicesOpen)}
               >
                 Services
-                <span className="text-xs" aria-hidden>
-                  {servicesOpen ? "▲" : "▼"}
-                </span>
+                <svg
+                  className={`w-3 h-3 transition-transform ${servicesOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
               {servicesOpen && (
-                <div className="absolute top-full left-0 mt-2 w-80 rounded-2xl border border-[#E5E7EB] bg-white shadow-xl p-4 max-h-[80vh] overflow-y-auto">
-                  <div className="space-y-1">
+                <div className="absolute top-full left-0 mt-4 w-80 bg-white shadow-elegant-lg rounded-sm py-4 border-t-2 border-lime">
+                  <div className="space-y-0.5">
                     {topServices.map((service) => (
                       <Link
                         key={service.slug}
                         href={service.slug}
-                        className="block rounded-xl px-4 py-2 text-sm text-[#111827] hover:bg-[#F3F4F6] hover:text-[#3B82F6] transition"
+                        className="block px-5 py-2.5 text-sm text-navy hover:bg-cream hover:text-navy-dark transition"
                         onClick={() => setServicesOpen(false)}
                       >
                         {service.title}
                       </Link>
                     ))}
                   </div>
-                  <Link
-                    href="/services"
-                    className="mt-4 block rounded-xl border border-[#3B82F6] px-4 py-2 text-center text-sm font-semibold text-[#3B82F6] hover:bg-[#EFF6FF] transition"
-                    onClick={() => setServicesOpen(false)}
-                  >
-                    View All {servicesData.length} Services
-                  </Link>
+                  <div className="border-t border-gray-200 mt-3 pt-3 px-5">
+                    <Link
+                      href="/services"
+                      className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-navy hover:text-lime transition"
+                      onClick={() => setServicesOpen(false)}
+                    >
+                      View All Services
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
 
+            {/* Locations Dropdown */}
             <div
               ref={locationsRef}
               className="relative"
@@ -187,41 +165,52 @@ export default function Header() {
             >
               <button
                 type="button"
-                className="flex items-center gap-1 text-sm font-medium text-[#111827] hover:text-[#3B82F6] transition aria-expanded:text-[#3B82F6]"
+                className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-super-wide text-white hover:text-lime transition"
                 aria-expanded={locationsOpen}
                 aria-haspopup="true"
                 onClick={() => setLocationsOpen(!locationsOpen)}
               >
                 Locations
-                <span className="text-xs" aria-hidden>
-                  {locationsOpen ? "▲" : "▼"}
-                </span>
+                <svg
+                  className={`w-3 h-3 transition-transform ${locationsOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
               {locationsOpen && (
-                <div className="absolute top-full left-0 mt-2 w-64 rounded-2xl border border-[#E5E7EB] bg-white shadow-xl p-4">
-                  <div className="space-y-1">
+                <div className="absolute top-full left-0 mt-4 w-64 bg-white shadow-elegant-lg rounded-sm py-4 border-t-2 border-lime">
+                  <div className="space-y-0.5">
                     {topLocations.map((location) => (
                       <Link
                         key={location.slug}
                         href={location.slug}
-                        className="block rounded-xl px-4 py-2 text-sm text-[#111827] hover:bg-[#F3F4F6] hover:text-[#3B82F6] transition"
+                        className="block px-5 py-2.5 text-sm text-navy hover:bg-cream hover:text-navy-dark transition"
                         onClick={() => setLocationsOpen(false)}
                       >
                         {location.title}
                       </Link>
                     ))}
                   </div>
-                  <Link
-                    href={LOCATIONS_ROUTE}
-                    className="mt-4 block rounded-xl border border-[#3B82F6] px-4 py-2 text-center text-sm font-semibold text-[#3B82F6] hover:bg-[#EFF6FF] transition"
-                    onClick={() => setLocationsOpen(false)}
-                  >
-                    View All {locationsData.length} Locations
-                  </Link>
+                  <div className="border-t border-gray-200 mt-3 pt-3 px-5">
+                    <Link
+                      href={LOCATIONS_ROUTE}
+                      className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-navy hover:text-lime transition"
+                      onClick={() => setLocationsOpen(false)}
+                    >
+                      View All Locations
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
 
+            {/* Tools Dropdown */}
             <div
               ref={toolsRef}
               className="relative"
@@ -230,81 +219,155 @@ export default function Header() {
             >
               <button
                 type="button"
-                className="flex items-center gap-1 text-sm font-medium text-[#111827] hover:text-[#3B82F6] transition aria-expanded:text-[#3B82F6]"
+                className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-super-wide text-white hover:text-lime transition"
                 aria-expanded={toolsOpen}
                 aria-haspopup="true"
                 onClick={() => setToolsOpen(!toolsOpen)}
               >
                 Tools
-                <span className="text-xs" aria-hidden>
-                  {toolsOpen ? "▲" : "▼"}
-                </span>
+                <svg
+                  className={`w-3 h-3 transition-transform ${toolsOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
               {toolsOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 rounded-2xl border border-[#E5E7EB] bg-white shadow-xl p-4">
-                  <div className="space-y-1">
+                <div className="absolute top-full left-0 mt-4 w-72 bg-white shadow-elegant-lg rounded-sm py-4 border-t-2 border-lime">
+                  <div className="space-y-0.5">
                     {tools.map((tool) => (
                       <Link
                         key={tool.href}
                         href={tool.href}
-                        className="block rounded-xl px-4 py-2 text-sm text-[#111827] hover:bg-[#F3F4F6] hover:text-[#3B82F6] transition"
+                        className="block px-5 py-2.5 text-sm text-navy hover:bg-cream hover:text-navy-dark transition"
                         onClick={() => setToolsOpen(false)}
                       >
                         {tool.name}
                       </Link>
                     ))}
                   </div>
-                  <Link
-                    href="/tools"
-                    className="mt-4 block rounded-xl border border-[#3B82F6] px-4 py-2 text-center text-sm font-semibold text-[#3B82F6] hover:bg-[#EFF6FF] transition"
-                    onClick={() => setToolsOpen(false)}
-                  >
-                    View All Tools
-                  </Link>
+                  <div className="border-t border-gray-200 mt-3 pt-3 px-5">
+                    <Link
+                      href="/tools"
+                      className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-navy hover:text-lime transition"
+                      onClick={() => setToolsOpen(false)}
+                    >
+                      View All Tools
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
 
             <Link
               href="/property-types"
-              className="text-sm font-medium text-[#111827] hover:text-[#3B82F6] transition"
+              className="text-xs font-semibold uppercase tracking-super-wide text-white hover:text-lime transition"
             >
               Property Types
             </Link>
 
             <Link
               href="/blog"
-              className="text-sm font-medium text-[#111827] hover:text-[#3B82F6] transition"
+              className="text-xs font-semibold uppercase tracking-super-wide text-white hover:text-lime transition"
             >
               Blog
             </Link>
 
             <Link
-              href="/about"
-              className="text-sm font-medium text-[#111827] hover:text-[#3B82F6] transition"
+              href="/contact"
+              className="text-xs font-semibold uppercase tracking-super-wide text-white hover:text-lime transition"
             >
-              About
+              Contact Us
             </Link>
 
-            <Link
-              href="/contact"
-              className="rounded-full bg-[#3B82F6] px-5 py-2 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#2563EB]"
+            <a
+              href={phoneNumberHref}
+              className="text-xs font-semibold uppercase tracking-super-wide text-white hover:text-lime transition"
             >
-              Contact
-            </Link>
+              {phoneNumberDisplay}
+            </a>
           </div>
 
-          <div className="md:hidden">
-            <Link
-              href="/contact"
-              className="rounded-full bg-[#3B82F6] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#2563EB]"
-            >
-              Contact
-            </Link>
-          </div>
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            className="lg:hidden flex items-center justify-center w-12 h-12 rounded-full bg-white text-navy hover:bg-lime transition"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-navy border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-6 py-6 space-y-4">
+            <Link
+              href="/services"
+              className="block text-sm font-semibold uppercase tracking-wide text-white hover:text-lime transition py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Services
+            </Link>
+            <Link
+              href={LOCATIONS_ROUTE}
+              className="block text-sm font-semibold uppercase tracking-wide text-white hover:text-lime transition py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Locations
+            </Link>
+            <Link
+              href="/tools"
+              className="block text-sm font-semibold uppercase tracking-wide text-white hover:text-lime transition py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Tools
+            </Link>
+            <Link
+              href="/property-types"
+              className="block text-sm font-semibold uppercase tracking-wide text-white hover:text-lime transition py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Property Types
+            </Link>
+            <Link
+              href="/blog"
+              className="block text-sm font-semibold uppercase tracking-wide text-white hover:text-lime transition py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Blog
+            </Link>
+            <Link
+              href="/contact"
+              className="block text-sm font-semibold uppercase tracking-wide text-white hover:text-lime transition py-2"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact Us
+            </Link>
+            <a
+              href={phoneNumberHref}
+              className="block text-sm font-semibold uppercase tracking-wide text-lime py-2"
+            >
+              {phoneNumberDisplay}
+            </a>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
-

@@ -1,196 +1,135 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, type Variants } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { locationsData } from "../data/locations";
-import { servicesData } from "../data/services";
 import { propertyTypesData } from "../data/property-types";
-import SearchInput from "./SearchInput";
-import {
-  Activity,
-  ArrowRight,
-  BarChart3,
-  Building2,
-  Calculator,
-  CheckCircle2,
-  DollarSign,
-  Factory,
-  FileText,
-  Gavel,
-  Globe,
-  Hotel,
-  Layers,
-  MapPin,
-  PhoneCall,
-  ShieldCheck,
-  Store,
-  Warehouse,
-} from "lucide-react";
-import ContactForm from "../app/contact/ContactForm";
 import { LOCATIONS_ROUTE } from "../lib/config";
 
 const phoneNumberDisplay = "(408) 539-2254";
 const phoneNumberHref = "tel:+14085392254";
-const hasStaffedOffice = false;
 
 const fadeIn: Variants = {
-  hidden: { opacity: 0, y: 32 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.4, 0, 0.2, 1] } },
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } },
 };
 
-const scaleUp: Variants = {
-  hidden: { opacity: 0, scale: 0.96 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } },
+const stagger: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
 };
 
-type Badge = {
-  icon: LucideIcon;
-  label: string;
-  detail: string;
-};
-
-const trustBadges: Badge[] = [
-  { icon: BarChart3, label: "CPA Partner", detail: "Workpapers synched to firm portals" },
-  { icon: ShieldCheck, label: "Qualified Intermediary", detail: "Segregated escrow controls" },
-  { icon: Gavel, label: "Legal Review", detail: "Counsel-ready documentation sets" },
-  { icon: CheckCircle2, label: "IRS Compliant", detail: "Audit trails with timestamping" },
+// Stats data
+const stats = [
+  { value: "500+", label: "Exchanges Coordinated" },
+  { value: "$2.5B+", label: "Total Exchange Volume" },
+  { value: "$250K-$50M", label: "Property Range" },
+  { value: "100%", label: "Compliance Rate" },
 ];
 
-const timelineStats = [
-  { label: "45 Days", detail: "Identification surveillance with alerts every morning" },
-  { label: "180 Days", detail: "Closing countdown backed by redundant reminders" },
-  { label: "0 Deadline Errors", detail: "Automated compliance logs since 2016" },
-];
-
-const services = [
+// Property types for carousel
+const propertyCategories = [
   {
-    title: "Exchange Intelligence Briefing",
-    detail: "Model relinquished equity, gain exposure, and qualified intermediary routing in one intake.",
+    title: "Single Tenant Retail",
+    description: "NNN properties with credit tenants for passive income",
+    image: "/locations/san-jose-1031-exchange.jpg",
+    href: "/property-types/convenience-store-gas-c-store",
   },
   {
-    title: "Qualified Escrow Administration",
-    detail: "Segregated trust accounts with dual-authentication release procedures and 24 hour reporting.",
+    title: "Medical Office",
+    description: "Clinics, urgent care, and dental facilities",
+    image: "/locations/palo-alto-1031-exchange.jpg",
+    href: "/property-types/urgent-care-medical-clinic",
   },
   {
-    title: "Replacement Benchmarking",
-    detail: "Compare Silicon Valley and statewide assets with yield, debt, and depreciation tables.",
+    title: "Industrial & Logistics",
+    description: "Warehouses and last-mile distribution centers",
+    image: "/locations/fremont-1031-exchange.jpg",
+    href: "/property-types/last-mile-logistics-flex",
   },
   {
-    title: "Compliance Clock Monitoring",
-    detail: "Live timeline dashboard that mirrors IRS 45 and 180 day milestones with documented notices.",
+    title: "Quick Service Restaurant",
+    description: "Drive-thru QSR and coffee locations",
+    image: "/locations/sunnyvale-1031-exchange.jpg",
+    href: "/property-types/drive-thru-qsr",
   },
   {
-    title: "Gain and Debt Modeling",
-    detail: "Project federal and California 1031 tax deferral scenarios alongside refinance impacts.",
+    title: "Auto Service",
+    description: "Oil change, tire stores, and auto parts retail",
+    image: "/locations/santa-clara-1031-exchange.jpg",
+    href: "/property-types/auto-service-oil-change",
   },
   {
-    title: "Advisor Coordination Desk",
-    detail: "Central point for brokers, attorneys, and CPAs with encrypted file exchange and audit notes.",
-  },
-];
-
-const propertyTypes: { icon: LucideIcon; title: string; detail: string }[] = [
-  { icon: Store, title: "Single Tenant Retail", detail: "Convenience stores, drive thru QSR, pharmacies, and dollar stores." },
-  { icon: Building2, title: "Net Lease Properties", detail: "Triple net lease properties featuring essential service tenants with investment-grade credit ratings, providing stable passive income with minimal landlord responsibilities." },
-  { icon: Warehouse, title: "Last Mile Logistics", detail: "Flex space and logistics facilities for e-commerce." },
-  { icon: Factory, title: "Auto Service Properties", detail: "Auto parts, oil change, and tire store locations." },
-  { icon: Activity, title: "Medical Properties", detail: "Urgent care, veterinary, and dental facilities." },
-  { icon: Store, title: "Specialty Retail", detail: "Specialty grocers, telecom retail, and ground leases." },
-];
-
-const californiaCities = [
-  locationsData.find((l) => l.slug === "san-jose"),
-  ...locationsData.filter((l) => l.slug !== "san-jose").slice(0, 7),
-]
-  .filter(Boolean)
-  .map((l) => ({
-    name: l!.name,
-    slug: l!.route,
-  }));
-
-const irsLinks = [
-  {
-    label: "IRS Form 8824 instructions",
-    href: "https://www.irs.gov/forms-pubs/about-form-8824",
-  },
-  {
-    label: "Like-kind exchange guidance",
-    href: "https://www.irs.gov/newsroom/like-kind-exchanges-real-estate-tax-tips",
-  },
-  {
-    label: "Rev. Proc. 2008-16 Safe Harbor",
-    href: "https://www.irs.gov/pub/irs-drop/rp-08-16.pdf",
+    title: "Grocery & Discount",
+    description: "Hard discount grocers and dollar stores",
+    image: "/locations/mountain-view-1031-exchange.jpg",
+    href: "/property-types/hard-discount-grocer",
   },
 ];
 
-const whyCards = [
-  "Local expertise across the Bay Area",
-  "Intermediary and legal integration",
-  "Transparent reporting dashboards",
-  "Fast communication cycles",
-  "Secure, compliant documentation",
-];
-
+// Featured tools
 const tools = [
   {
     name: "Boot Calculator",
-    slug: "boot-calculator",
-    description: "Calculate boot and estimate tax implications for your 1031 exchange.",
-    icon: DollarSign,
+    description: "Calculate boot and estimate tax implications for your 1031 exchange. Understand cash and debt boot to maximize tax deferral.",
+    href: "/tools/boot-calculator",
+    badge: "Popular",
   },
   {
     name: "Exchange Cost Estimator",
-    slug: "exchange-cost-estimator",
-    description: "Estimate QI fees, escrow costs, title insurance, and recording fees.",
-    icon: Calculator,
+    description: "Estimate QI fees, escrow costs, title insurance, and recording fees for your upcoming exchange transaction.",
+    href: "/tools/exchange-cost-estimator",
+    badge: "Essential",
   },
   {
     name: "Identification Rules Checker",
-    slug: "identification-rules-checker",
-    description: "Validate your property identification against IRS rules.",
-    icon: CheckCircle2,
+    description: "Validate your property identification against IRS rules including the 3-property, 200%, and 95% rules.",
+    href: "/tools/identification-rules-checker",
+    badge: "Compliance",
   },
 ];
 
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
+// Featured locations
+const featuredLocations = [
+  { name: "San Jose", slug: "/locations/san-jose-ca", image: "/locations/san-jose-1031-exchange.jpg" },
+  { name: "Palo Alto", slug: "/locations/palo-alto-ca", image: "/locations/palo-alto-1031-exchange.jpg" },
+  { name: "Mountain View", slug: "/locations/mountain-view-ca", image: "/locations/mountain-view-1031-exchange.jpg" },
+  { name: "Sunnyvale", slug: "/locations/sunnyvale-ca", image: "/locations/sunnyvale-1031-exchange.jpg" },
+  { name: "Santa Clara", slug: "/locations/santa-clara-ca", image: "/locations/santa-clara-1031-exchange.jpg" },
+  { name: "Fremont", slug: "/locations/fremont-ca", image: "/locations/fremont-1031-exchange.jpg" },
+];
 
+// FAQ items
 const faqItems = [
   {
     question: "What are the 45 and 180 day deadlines?",
     answer:
-      "Day zero begins the moment the relinquished property closes. You receive forty five calendar days to identify up to three replacements and one hundred eighty days to acquire and close on one or more of those identified assets. Our compliance clock documents every notification to prove diligence.",
+      "Day zero begins the moment the relinquished property closes. You receive forty-five calendar days to identify up to three replacement properties and one hundred eighty days to acquire and close on one or more of those identified assets.",
   },
   {
     question: "Which properties qualify as like-kind?",
     answer:
-      "Like-kind real estate includes most real property held for investment or productive use, so an apartment tower may be exchanged for an industrial park, a medical office, or raw land. The assets must be inside the United States and held for business or investment, never for personal use.",
+      "Like-kind real estate includes most real property held for investment or productive use, so an apartment tower may be exchanged for an industrial park, a medical office, or raw land. The assets must be inside the United States and held for business or investment.",
   },
   {
     question: "What is boot and how is it taxed?",
     answer:
-      "Boot is any non-like-kind value received, such as cash, debt relief, or personal property. Boot is taxable up to the amount of realized gain and is reported on Form 8824 before flowing to Schedule D and Form 4797. We flag potential boot early so you can rebalance debt or consider promissory notes.",
-  },
-  {
-    question: "Are California transfer taxes deferred?",
-    answer:
-      "California transfer taxes are generally due at the time of recording and are not deferred by a 1031 exchange. Counties may offer exemptions for specific intra-family or affordable housing transfers, so we coordinate with local recorders to confirm obligations before closing.",
+      "Boot is any non-like-kind value received, such as cash, debt relief, or personal property. Boot is taxable up to the amount of realized gain and is reported on Form 8824.",
   },
   {
     question: "Can I perform a reverse exchange?",
     answer:
-      "Yes. A reverse exchange requires a qualified exchange accommodation arrangement in which the replacement property is parked by an accommodator until the relinquished asset sells. We coordinate title-holding entities, loan consents, and IRS Rev. Proc. 2000-37 requirements.",
-  },
-  {
-    question: "How do I report with Form 8824?",
-    answer:
-      "Form 8824 captures the timeline, identification list, basis adjustments, and boot calculations. The form then informs Schedule D and Form 4797. We deliver organized ledgers, exchanger statements, and escrow proofs so your CPA can file with confidence.",
+      "Yes. A reverse exchange requires a qualified exchange accommodation arrangement in which the replacement property is parked by an accommodator until the relinquished asset sells.",
   },
 ];
 
+// JSON-LD for SEO
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -212,23 +151,6 @@ const organizationJsonLd = {
     postalCode: "95113",
     addressCountry: "US",
   },
-  sameAs: [
-    "https://www.linkedin.com",
-    "https://www.youtube.com",
-    "https://www.facebook.com",
-  ],
-};
-
-const websiteJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "1031 Exchange San Jose",
-  url: "https://www.1031exchangesanjose.com/",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: "https://www.1031exchangesanjose.com/search?q={search_term_string}",
-    "query-input": "required name=search_term_string",
-  },
 };
 
 const faqJsonLd = {
@@ -244,627 +166,511 @@ const faqJsonLd = {
   })),
 };
 
-const professionalServiceJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  name: "1031 Exchange San Jose",
-  description:
-    "Bay Area 1031 exchange specialists offering compliant, technology-driven coordination for investors across Northern California.",
-  url: "https://www.1031exchangesanjose.com/",
-  areaServed: {
-    "@type": "State",
-    name: "California",
-  },
-  serviceType: "1031 Exchange Property Identification",
-  provider: {
-    "@type": "Organization",
-    name: "1031 Exchange San Jose",
-    contactPoint: {
-      "@type": "ContactPoint",
-      telephone: "+1-408-539-2254",
-      contactType: "customer service",
-      areaServed: "US-CA",
-      availableLanguage: ["English"],
-    },
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "84 West Santa Clara St",
-      addressLocality: "San Jose",
-      addressRegion: "CA",
-      postalCode: "95113",
-      addressCountry: "US",
-    },
-  },
-};
-
 export default function HomePage() {
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  // Auto-scroll carousel
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1) % propertyCategories.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const scrollToIndex = (index: number) => {
+    setCarouselIndex(index);
+  };
+
   return (
     <>
-      <div className="bg-[#F9FAFB] text-[#111827]">
+      <div className="bg-white text-gray-900">
         <main>
-          <section
-            id="hero"
-            className="relative isolate overflow-hidden bg-gradient-to-b from-[#0F172A] via-[#111827] to-[#F9FAFB] text-white"
-          >
+          {/* Hero Section - Video Placeholder */}
+          <section className="relative min-h-[70vh] flex items-center justify-center bg-navy overflow-hidden">
+            {/* Video placeholder area - will be replaced with actual video */}
             <div className="absolute inset-0">
-              <img
+              <Image
                 src="/san-jose-hero-1031-exchange.jpg"
                 alt="San Jose skyline"
-                className="absolute inset-0 h-full w-full object-cover"
+                fill
+                className="object-cover"
+                priority
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A]/90 via-[#111827]/85 to-[#0F172A]/90" />
-              <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#3B82F6]/40 blur-3xl" />
-              <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-white/10 to-transparent opacity-60 backdrop-blur-xl" />
+              <div className="absolute inset-0 bg-navy/70" />
             </div>
-            <div className="relative max-w-7xl mx-auto px-6 md:px-10 py-20 md:py-28">
-              <div className="grid gap-12 lg:grid-cols-2">
-                <motion.div
+            
+            <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={stagger}
+                className="space-y-8"
+              >
+                <motion.h1
                   variants={fadeIn}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.4 }}
-                  className="space-y-8"
+                  className="font-heading text-4xl md:text-6xl lg:text-7xl text-white tracking-tight"
                 >
-                  <p className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white/80">
-                    <span className="h-2 w-2 rounded-full bg-[#3B82F6] animate-pulse" aria-hidden />
-                    Precision for 1031 Exchange San Jose
-                  </p>
-                  <div className="space-y-6">
-                    <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
-                      San Jose 1031 Exchange Experts
-                    </h1>
-                    <p className="max-w-xl text-lg text-white/80">
-                      Compliant 1031 exchanges for Bay Area investors who need technology-driven coordination, zero tolerance for deadline risk, and verified qualified intermediary controls.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    <Link
-                      href="#lead-form"
-                      className="inline-flex items-center justify-center rounded-full bg-[#3B82F6] px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#2563EB]"
-                    >
-                      Start My Exchange
-                    </Link>
-                    <a
-                      href={phoneNumberHref}
-                      className="inline-flex items-center justify-center rounded-full border border-white/30 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:border-white hover:text-white"
-                      aria-label={`Call ${phoneNumberDisplay}`}
-                    >
-                      Call {phoneNumberDisplay}
-                    </a>
-                  </div>
-                  <p className="text-sm text-white/70">
-                    45 Day identification. 180 Day closing. Stay compliant with every deadline.
-                  </p>
-                </motion.div>
-                <motion.div
-                  id="lead-form"
-                  variants={scaleUp}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.3 }}
-                  className="rounded-3xl p-8"
+                  1031 Exchange San Jose
+                </motion.h1>
+                <motion.p
+                  variants={fadeIn}
+                  className="text-sm md:text-base uppercase tracking-ultra-wide text-white/80 font-medium"
                 >
-                  <div className="flex items-center gap-3 text-sm font-semibold text-white mb-6">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#3B82F6]/20 text-white">
-                      <PhoneCall className="h-5 w-5" aria-hidden />
-                    </div>
-                    <div>
-                      <p>Request a confidential consultation</p>
-                      <p className="text-xs text-white/70">Responses within one business day</p>
-                    </div>
-                  </div>
-                  <ContactForm className="!border-0 !shadow-none !p-0" darkMode={true} />
-                </motion.div>
-              </div>
-            </div>
-          </section>
-
-          <section className="relative bg-[#0F172A] py-10 text-white">
-            <motion.div
-              className="absolute top-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-[#3B82F6] to-transparent"
-              animate={{
-                opacity: [0.4, 1, 0.4],
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
-            <div className="max-w-7xl mx-auto px-6 md:px-10">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {trustBadges.map((badge) => (
-                  <motion.div
-                    key={badge.label}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                    className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+                  Silicon Valley's Premier Exchange Specialists
+                </motion.p>
+                <motion.div variants={fadeIn} className="flex flex-wrap items-center justify-center gap-4 pt-4">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center justify-center bg-white text-navy px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-lime hover:text-navy-dark transition-all duration-300"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-[#3B82F6]">
-                        <span className="absolute inset-0 rounded-full border border-white/20" aria-hidden />
-                        <badge.icon className="h-5 w-5" aria-hidden />
-                      </div>
-                      <h3 className="text-sm font-semibold uppercase tracking-[0.2em]">{badge.label}</h3>
-                    </div>
-                    <p className="text-sm text-white/70">{badge.detail}</p>
-                  </motion.div>
-                ))}
-              </div>
+                    Start Your Exchange
+                  </Link>
+                  <a
+                    href={phoneNumberHref}
+                    className="inline-flex items-center justify-center border-2 border-white text-white px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-white hover:text-navy transition-all duration-300"
+                  >
+                    Call {phoneNumberDisplay}
+                  </a>
+                </motion.div>
+              </motion.div>
             </div>
           </section>
 
+          {/* Stats Section */}
           <section className="bg-white py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10 grid gap-16 lg:grid-cols-2">
+            <div className="max-w-7xl mx-auto px-6 lg:px-10">
               <motion.div
-                variants={fadeIn}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
-                className="space-y-6"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={stagger}
+                className="text-center mb-16"
               >
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
-                  Proven California 1031 intermediary
-                </p>
-                <h2 className="text-3xl font-semibold text-[#0F172A]">
-                  Local intelligence with compliance-grade precision
-                </h2>
-                <p className="text-lg text-[#374151]">
-                  Our San Jose desk combines licensed qualified intermediary controls with a modular workflow that investors, brokers, and CPAs see in real time. Every exchange file receives a data room, encrypted ledger, and audit-ready documentation chain.
-                </p>
-                <ul className="space-y-4 text-[#1F2937]">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-1 h-5 w-5 text-[#3B82F6]" aria-hidden />
-                    <span>California 1031 intermediary oversight tuned for Silicon Valley deal velocity.</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-1 h-5 w-5 text-[#3B82F6]" aria-hidden />
-                    <span>Digital exchange binder with timestamped approvals, wire proofs, and intermediary instructions.</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-1 h-5 w-5 text-[#3B82F6]" aria-hidden />
-                    <span>Analyst team on the ground in San Jose, coordinating with brokers across Santa Clara County.</span>
-                  </li>
-                </ul>
+                <motion.h2
+                  variants={fadeIn}
+                  className="font-heading text-3xl md:text-4xl lg:text-5xl text-navy tracking-wide uppercase"
+                >
+                  Your San Jose 1031 Exchange Experts
+                </motion.h2>
               </motion.div>
+              
               <motion.div
-                className="grid gap-6 sm:grid-cols-2"
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
-                variants={{
-                  hidden: {},
-                  visible: {
-                    transition: {
-                      staggerChildren: 0.15,
-                    },
-                  },
-                }}
+                viewport={{ once: true, amount: 0.3 }}
+                variants={stagger}
+                className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12"
               >
-                {timelineStats.map((stat) => (
+                {stats.map((stat, index) => (
                   <motion.div
                     key={stat.label}
-                    variants={scaleUp}
-                    className="rounded-3xl border border-[#E5E7EB] bg-gradient-to-br from-white to-[#F3F4F6] p-8 shadow-lg"
+                    variants={fadeIn}
+                    className="text-center"
                   >
-                    <p className="text-4xl font-semibold text-[#0F172A]">{stat.label}</p>
-                    <p className="mt-3 text-sm text-[#4B5563]">{stat.detail}</p>
+                    <p className="font-heading text-3xl md:text-4xl lg:text-5xl text-navy italic">
+                      {stat.value}
+                    </p>
+                    <p className="mt-3 text-xs md:text-sm uppercase tracking-wider text-gray-600 font-medium">
+                      {stat.label}
+                    </p>
                   </motion.div>
                 ))}
+              </motion.div>
+
+              {/* Action Cards */}
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={stagger}
+                className="grid md:grid-cols-3 gap-6 mt-20"
+              >
+                <motion.div variants={fadeIn}>
+                  <Link
+                    href="/services"
+                    className="group relative block h-72 overflow-hidden"
+                  >
+                    <Image
+                      src="/locations/san-jose-1031-exchange.jpg"
+                      alt="Find Properties"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-navy/60 group-hover:bg-navy/50 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="font-heading text-2xl md:text-3xl text-white uppercase tracking-wide">
+                        Find Properties
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
+                
+                <motion.div variants={fadeIn}>
+                  <Link
+                    href="/contact"
+                    className="group relative block h-72 overflow-hidden"
+                  >
+                    <Image
+                      src="/locations/palo-alto-1031-exchange.jpg"
+                      alt="Contact Us"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-navy/60 group-hover:bg-navy/50 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="font-heading text-2xl md:text-3xl text-white uppercase tracking-wide">
+                        Contact Us
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
+                
+                <motion.div variants={fadeIn}>
+                  <Link
+                    href="/tools"
+                    className="group relative block h-72 overflow-hidden"
+                  >
+                    <Image
+                      src="/locations/mountain-view-1031-exchange.jpg"
+                      alt="Exchange Tools"
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-navy/60 group-hover:bg-navy/50 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="font-heading text-2xl md:text-3xl text-white uppercase tracking-wide">
+                        Exchange Tools
+                      </span>
+                    </div>
+                  </Link>
+                </motion.div>
               </motion.div>
             </div>
           </section>
 
-          <section className="bg-[#F9FAFB] py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10">
-              <div className="space-y-6 text-center">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
-                  How a 1031 works
-                </p>
-                <h2 className="text-3xl font-semibold text-[#0F172A]">Connected timeline with monitored nodes</h2>
-              </div>
-              <div className="relative mt-12">
-                <motion.div
-                  className="absolute top-1/2 left-0 hidden h-px w-full -translate-y-1/2 bg-gradient-to-r from-transparent via-[#3B82F6] to-transparent md:block"
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{ repeat: Infinity, duration: 4 }}
-                  aria-hidden
+          {/* Property Types Carousel Section */}
+          <section className="relative bg-navy">
+            <div className="grid lg:grid-cols-2">
+              {/* Left Panel */}
+              <div className="relative min-h-[400px] lg:min-h-[600px] overflow-hidden">
+                <Image
+                  src={propertyCategories[carouselIndex].image}
+                  alt={propertyCategories[carouselIndex].title}
+                  fill
+                  className="object-cover transition-all duration-700"
                 />
-                <div className="grid gap-10 md:grid-cols-3">
-                  {[
-                    "Sell relinquished property",
-                    "Identify replacements within 45 days",
-                    "Close on new property within 180 days",
-                  ].map((step, idx) => (
-                    <motion.div
-                      key={step}
-                      className="relative rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-lg"
-                      initial={{ opacity: 0, y: 32 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: idx * 0.1 }}
-                    >
-                      <span className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
-                        Node {idx + 1}
-                      </span>
-                      <p className="mt-4 text-lg font-semibold text-[#0F172A]">{step}</p>
-                      <p className="mt-2 text-sm text-[#4B5563]">
-                        We capture every timestamp, wire, and document to protect the 1031 tax deferral.
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-sm text-[#2563EB]">
-                {irsLinks.map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#BFDBFE] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#1D4ED8] transition hover:border-[#1D4ED8]"
-                  >
-                    <FileText className="h-4 w-4" aria-hidden />
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="bg-gradient-to-b from-[#F9FAFB] to-[#EEF2FF] py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10 space-y-12">
-              <div className="space-y-4 text-center">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
-                  Why California investors choose us
-                </p>
-                <h2 className="text-3xl font-semibold text-[#0F172A]">Glass deck of advantages</h2>
-                <p className="text-lg text-[#4B5563]">
-                  A data-first workflow purpose-built for Qualified intermediary San Jose engagements.
-                </p>
-              </div>
-              <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-5">
-                {whyCards.map((card) => (
-                  <motion.div
-                    key={card}
-                    className="rounded-3xl border border-white/70 bg-white/60 p-6 text-sm font-medium text-[#0F172A] shadow-lg backdrop-blur transition hover:-translate-y-1 hover:shadow-xl"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    {card}
-                  </motion.div>
-                ))}
-              </div>
-              <p className="text-sm text-[#4B5563]">
-                A 1031 exchange defers federal and California income tax on qualifying real property. It does not remove city or state transfer taxes.{" "}
-                <a
-                  href="https://www.cdtfa.ca.gov/taxes-and-fees/property-tax.htm"
-                  className="text-[#2563EB] underline underline-offset-4"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Review California transfer tax guidance
-                </a>
-                .
-              </p>
-            </div>
-          </section>
-
-          <section className="bg-white py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10 space-y-12">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
-                    Our exchange services
+                <div className="absolute inset-0 bg-gradient-to-r from-navy/80 via-navy/40 to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-center p-8 lg:p-16">
+                  <p className="text-lime text-sm uppercase tracking-ultra-wide font-semibold mb-4">
+                    Property Type
                   </p>
-                  <h2 className="text-3xl font-semibold text-[#0F172A]">Services preview with neon precision</h2>
-                </div>
-                <Link
-                  href="/services/"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6] px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
-                >
-                  See all services
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
-              </div>
-              <div className="max-w-2xl">
-                <SearchInput
-                  placeholder="Search services..."
-                  items={servicesData.slice(0, 6).map((s) => ({ title: s.name, slug: s.route }))}
-                  className="mb-6"
-                />
-              </div>
-              <div className="grid gap-6 md:grid-cols-3">
-                {servicesData.slice(0, 6).map((service) => (
-                  <motion.div
-                    key={service.slug}
-                    className="rounded-3xl border border-[#E0E7FF] bg-white p-6 shadow-lg transition hover:border-[#3B82F6] hover:shadow-blue-100"
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#3B82F6]/10 text-[#1D4ED8]">
-                      <Layers className="h-5 w-5" aria-hidden />
-                    </div>
-                    <h3 className="mt-6 text-lg font-semibold text-[#0F172A]">{service.name}</h3>
-                    <p className="mt-3 text-sm text-[#4B5563]">{service.short}</p>
-                    <Link
-                      href={service.route}
-                      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#3B82F6] hover:gap-3 transition-all"
-                    >
-                      Learn more
-                      <ArrowRight className="h-4 w-4" aria-hidden />
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="bg-[#F3F4F6] py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10 grid gap-12 lg:grid-cols-[1.1fr_1fr] items-center">
-              <div className="space-y-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
-                  Property intelligence
-                </p>
-                <h2 className="text-3xl font-semibold text-[#0F172A]">Property types we manage</h2>
-                <p className="text-lg text-[#4B5563]">
-                  Explore eligible property categories and understand how capital can flow between Silicon Valley assets and statewide holdings without triggering immediate tax.
-                </p>
-                <Link
-                  href="/property-types/"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#0F172A] px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#0F172A] transition hover:bg-white"
-                >
-                  Explore property types
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {propertyTypes.map((type) => (
-                  <motion.div
-                    key={type.title}
-                    className="rounded-2xl border border-white/60 bg-white/80 p-6 shadow-md backdrop-blur"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4 }}
-                  >
-                    <type.icon className="h-6 w-6 text-[#2563EB]" aria-hidden />
-                    <p className="mt-4 text-base font-semibold text-[#0F172A]">{type.title}</p>
-                    <p className="mt-2 text-sm text-[#4B5563]">{type.detail}</p>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="bg-white py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10 space-y-10">
-              <div className="text-center space-y-4">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">California coverage</p>
-                <h2 className="text-3xl font-semibold text-[#0F172A]">
-                  Serving investors across Silicon Valley and California
-                </h2>
-                <p className="text-lg text-[#4B5563]">
-                  Coordination hubs in San Jose connect to brokers and advisors in every major market.
-                </p>
-              </div>
-              <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-                <motion.div
-                  className="rounded-3xl border border-[#E5E7EB] bg-[#F9FAFB] p-8 shadow-inner"
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <div className="flex items-center gap-3 text-sm font-semibold text-[#0F172A]">
-                    <Activity className="h-5 w-5 text-[#3B82F6]" aria-hidden />
-                    Market nodes monitored
-                  </div>
-                  <div className="mt-6">
-                    <SearchInput
-                      placeholder="Search locations..."
-                      items={locationsData.map((l) => ({ title: l.name, slug: l.route }))}
-                      contactRedirectPrefix="Location: "
-                      className="mb-6"
-                    />
-                  </div>
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                    {californiaCities.map((city) => (
-                      <Link
-                        key={city.name}
-                        href={city.slug}
-                        className="flex items-center gap-3 rounded-2xl border border-white/0 bg-white/70 px-4 py-3 text-sm font-semibold text-[#0F172A] shadow transition hover:border-[#3B82F6] hover:text-[#1D4ED8]"
-                      >
-                        <MapPin className="h-4 w-4 text-[#2563EB]" aria-hidden />
-                        {city.name}
-                      </Link>
-                    ))}
-                  </div>
-                  <div className="mt-6">
-                    <Link
-                      href={LOCATIONS_ROUTE}
-                      className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6] px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#3B82F6] transition hover:bg-[#EFF6FF]"
-                    >
-                      View All {locationsData.length} Locations
-                      <ArrowRight className="h-4 w-4" aria-hidden />
-                    </Link>
-                  </div>
-                </motion.div>
-                <motion.div
-                  className="rounded-3xl border border-[#E5E7EB] bg-gradient-to-br from-white to-[#EFF6FF] p-8 shadow-lg"
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                >
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">Next step</p>
-                  <h3 className="mt-4 text-2xl font-semibold text-[#0F172A]">Plan your statewide deployment</h3>
-                  <p className="mt-4 text-sm text-[#4B5563]">
-                    Whether you are rolling into Silicon Valley AI campuses or diversifying into Sacramento industrial parks, our Qualified intermediary San Jose team documents every compliance checkpoint.
+                  <h3 className="font-heading text-3xl md:text-4xl lg:text-5xl text-white mb-4">
+                    {propertyCategories[carouselIndex].title}
+                  </h3>
+                  <p className="text-white/80 text-lg mb-8 max-w-md">
+                    {propertyCategories[carouselIndex].description}
                   </p>
                   <Link
-                    href={LOCATIONS_ROUTE}
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#0F172A] px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white hover:bg-[#111827]"
+                    href={propertyCategories[carouselIndex].href}
+                    className="inline-flex items-center gap-3 bg-white text-navy px-6 py-3 text-sm font-semibold uppercase tracking-wider w-fit hover:bg-lime transition-colors duration-300"
                   >
-                    See locations
-                    <ArrowRight className="h-4 w-4" aria-hidden />
+                    View Properties
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </Link>
-                </motion.div>
+                </div>
               </div>
+              
+              {/* Right Panel */}
+              <div className="relative min-h-[400px] lg:min-h-[600px] overflow-hidden">
+                <Image
+                  src={propertyCategories[(carouselIndex + 1) % propertyCategories.length].image}
+                  alt={propertyCategories[(carouselIndex + 1) % propertyCategories.length].title}
+                  fill
+                  className="object-cover transition-all duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-l from-navy/80 via-navy/40 to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-center items-end text-right p-8 lg:p-16">
+                  <p className="text-lime text-sm uppercase tracking-ultra-wide font-semibold mb-4">
+                    Property Type
+                  </p>
+                  <h3 className="font-heading text-3xl md:text-4xl lg:text-5xl text-white mb-4">
+                    {propertyCategories[(carouselIndex + 1) % propertyCategories.length].title}
+                  </h3>
+                  <p className="text-white/80 text-lg mb-8 max-w-md">
+                    {propertyCategories[(carouselIndex + 1) % propertyCategories.length].description}
+                  </p>
+                  <Link
+                    href={propertyCategories[(carouselIndex + 1) % propertyCategories.length].href}
+                    className="inline-flex items-center gap-3 bg-white text-navy px-6 py-3 text-sm font-semibold uppercase tracking-wider w-fit hover:bg-lime transition-colors duration-300"
+                  >
+                    View Properties
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                </div>
+              </div>
+            </div>
+            
+            {/* Carousel Navigation */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3">
+              {propertyCategories.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === carouselIndex || index === (carouselIndex + 1) % propertyCategories.length
+                      ? "bg-lime scale-125"
+                      : "bg-white/40 hover:bg-white/60"
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
             </div>
           </section>
 
-          <section className="bg-white py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10 space-y-12">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">
-                    Exchange Tools
-                  </p>
-                  <h2 className="text-3xl font-semibold text-[#0F172A]">Free Calculators & Resources</h2>
-                </div>
+          {/* Featured Tools Section */}
+          <section className="bg-cream py-20 md:py-28">
+            <div className="max-w-7xl mx-auto px-6 lg:px-10">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={stagger}
+                className="text-center mb-16"
+              >
+                <motion.h2
+                  variants={fadeIn}
+                  className="font-heading text-3xl md:text-4xl lg:text-5xl text-navy tracking-wide uppercase"
+                >
+                  Featured Tools
+                </motion.h2>
+                <motion.p variants={fadeIn} className="mt-4 text-gray-600 max-w-2xl mx-auto">
+                  Free calculators and resources to help you plan your 1031 exchange.
+                </motion.p>
+              </motion.div>
+              
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.2 }}
+                variants={stagger}
+                className="grid md:grid-cols-3 gap-8"
+              >
+                {tools.map((tool) => (
+                  <motion.div key={tool.href} variants={fadeIn}>
+                    <Link
+                      href={tool.href}
+                      className="group block bg-white shadow-elegant hover:shadow-elegant-lg transition-all duration-300 h-full"
+                    >
+                      <div className="relative h-48 bg-navy overflow-hidden">
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="font-heading text-6xl text-lime/20 group-hover:text-lime/30 transition-colors duration-300">
+                            1031
+                          </span>
+                        </div>
+                        <div className="absolute top-4 right-4">
+                          <span className="bg-lime text-navy-dark text-xs font-bold uppercase tracking-wider px-3 py-1.5">
+                            {tool.badge}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="p-6">
+                        <h3 className="font-heading text-xl text-navy group-hover:text-lime-dark transition-colors duration-300">
+                          {tool.name}
+                        </h3>
+                        <p className="mt-3 text-gray-600 text-sm leading-relaxed">
+                          {tool.description}
+                        </p>
+                        <div className="mt-6 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-navy group-hover:text-lime-dark transition-colors duration-300">
+                          Use Tool
+                          <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </motion.div>
+              
+              <div className="text-center mt-12">
                 <Link
                   href="/tools"
-                  className="inline-flex items-center gap-2 rounded-full border border-[#3B82F6] px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#1D4ED8] transition hover:bg-[#EFF6FF]"
+                  className="inline-flex items-center justify-center bg-navy text-white px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-navy-light transition-colors duration-300"
                 >
                   View All Tools
-                  <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
-              </div>
-              <div className="grid gap-6 md:grid-cols-3">
-                {tools.map((tool) => {
-                  const Icon = tool.icon;
-                  return (
-                    <motion.div
-                      key={tool.slug}
-                      variants={fadeUp}
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true }}
-                      className="group rounded-2xl border border-gray-200 bg-gradient-to-br from-[#0B3C5D] to-[#16486C] p-8 text-white shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
-                    >
-                      <Link href={`/tools/${tool.slug}`} className="block">
-                        <Icon className="mb-4 h-12 w-12 text-[#C9A227]" />
-                        <h3 className="mb-2 text-2xl font-semibold">{tool.name}</h3>
-                        <p className="text-gray-100">{tool.description}</p>
-                      </Link>
-                    </motion.div>
-                  );
-                })}
               </div>
             </div>
           </section>
 
-          <section className="bg-[#F9FAFB] py-20 md:py-28">
-            <div className="max-w-7xl mx-auto px-6 md:px-10 space-y-8">
-              <div className="text-center space-y-4">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">Frequently asked questions</p>
-                <h2 className="text-3xl font-semibold text-[#0F172A]">FAQ for investors, brokers, and advisors</h2>
-              </div>
-              <div className="space-y-4">
-                {faqItems.map((item) => (
-                  <details
-                    key={item.question}
-                    className="group rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-sm"
+          {/* Featured Locations Grid */}
+          <section className="bg-white py-20 md:py-28">
+            <div className="max-w-7xl mx-auto px-6 lg:px-10">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={stagger}
+                className="text-center mb-16"
+              >
+                <motion.h2
+                  variants={fadeIn}
+                  className="font-heading text-3xl md:text-4xl lg:text-5xl text-navy tracking-wide uppercase"
+                >
+                  Featured Locations
+                </motion.h2>
+                <motion.p variants={fadeIn} className="mt-4 text-gray-600 max-w-2xl mx-auto">
+                  Browse our areas of expertise below.
+                </motion.p>
+              </motion.div>
+              
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-0">
+                {featuredLocations.map((location, index) => (
+                  <Link
+                    key={location.slug}
+                    href={location.slug}
+                    className="group relative h-64 lg:h-80 overflow-hidden"
                   >
-                    <summary className="flex cursor-pointer items-center justify-between text-left text-lg font-semibold text-[#0F172A]">
-                      {item.question}
-                      <span className="ml-4 flex h-8 w-8 items-center justify-center rounded-full border border-[#E5E7EB] text-sm transition group-open:bg-[#3B82F6] group-open:text-white">
+                    <Image
+                      src={location.image}
+                      alt={location.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-navy/40 group-hover:bg-navy/30 transition-colors duration-300" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <h3 className="font-heading text-2xl lg:text-3xl text-white uppercase tracking-wider">
+                        {location.name}
+                      </h3>
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                      <div className="bg-navy p-4 text-center">
+                        <span className="text-sm font-semibold uppercase tracking-wider text-lime">
+                          Learn More
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              
+              <div className="text-center mt-12">
+                <Link
+                  href={LOCATIONS_ROUTE}
+                  className="inline-flex items-center justify-center bg-navy text-white px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-navy-light transition-colors duration-300"
+                >
+                  View All
+                </Link>
+              </div>
+            </div>
+          </section>
+
+          {/* FAQ Section */}
+          <section className="bg-cream py-20 md:py-28">
+            <div className="max-w-4xl mx-auto px-6 lg:px-10">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={stagger}
+                className="text-center mb-16"
+              >
+                <motion.h2
+                  variants={fadeIn}
+                  className="font-heading text-3xl md:text-4xl lg:text-5xl text-navy tracking-wide uppercase"
+                >
+                  Frequently Asked Questions
+                </motion.h2>
+              </motion.div>
+              
+              <div className="space-y-4">
+                {faqItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200"
+                  >
+                    <button
+                      onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                      className="w-full flex items-center justify-between p-6 text-left"
+                    >
+                      <span className="font-heading text-lg text-navy pr-4">{item.question}</span>
+                      <span className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full border border-navy text-navy transition-transform duration-300 ${openFaq === index ? "rotate-45" : ""}`}>
                         +
                       </span>
-                    </summary>
-                    <p className="mt-4 text-sm text-[#4B5563]">{item.answer}</p>
-                  </details>
+                    </button>
+                    <div
+                      className={`overflow-hidden transition-all duration-300 ${
+                        openFaq === index ? "max-h-96" : "max-h-0"
+                      }`}
+                    >
+                      <p className="px-6 pb-6 text-gray-600 leading-relaxed">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
           </section>
 
-          <section className="bg-gradient-to-r from-[#1D4ED8] to-[#0F172A] py-20 md:py-28 text-white">
-            <div className="max-w-4xl mx-auto px-6 md:px-10 text-center space-y-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Final call to action</p>
-              <h2 className="text-3xl font-semibold">Ready To Begin Your 1031 Exchange?</h2>
-              <p className="text-lg text-white/80">
-                Our San Jose team combines local knowledge with technology to help you stay compliant and protect your returns.
-              </p>
-              <Link
-                href="#lead-form"
-                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#0F172A] transition hover:bg-[#F0F2F8]"
+          {/* CTA Section */}
+          <section className="relative min-h-[500px] flex items-center justify-center overflow-hidden">
+            <div className="absolute inset-0">
+              <Image
+                src="/locations/fremont-1031-exchange.jpg"
+                alt="Partner with our team"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-navy/80" />
+            </div>
+            
+            <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.3 }}
+                variants={stagger}
+                className="space-y-8"
               >
-                Start My Exchange
-              </Link>
+                <motion.h2
+                  variants={fadeIn}
+                  className="font-heading text-3xl md:text-4xl lg:text-5xl text-white uppercase tracking-wide"
+                >
+                  Partner With Our Expert Team
+                </motion.h2>
+                <motion.p variants={fadeIn} className="text-white/80 text-lg max-w-2xl mx-auto">
+                  Our San Jose team delivers deep local knowledge and full-service support for your 1031 exchange. 
+                  Let us guide you through the process with precision, compliance, and personalized care.
+                </motion.p>
+                <motion.div variants={fadeIn}>
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center justify-center bg-white text-navy px-8 py-4 text-sm font-semibold uppercase tracking-wider hover:bg-lime hover:text-navy-dark transition-all duration-300"
+                  >
+                    Let's Get Started
+                  </Link>
+                </motion.div>
+              </motion.div>
             </div>
           </section>
         </main>
-        <footer className="bg-[#0B1220] text-white">
-          <div className="max-w-7xl mx-auto px-6 md:px-10 py-16 grid gap-10 lg:grid-cols-4">
-            <div className="space-y-4">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">1031 Exchange San Jose</p>
-              <p className="text-2xl font-semibold">California Qualified Intermediary Network</p>
-              <p className="text-sm text-white/70">
-                {hasStaffedOffice
-                  ? "95 South Market Street, Floor 4, San Jose, CA 95113"
-                  : "Serving all of California from Silicon Valley operations centers."}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">Quick links</p>
-              <ul className="mt-4 space-y-2 text-sm text-white/80">
-                <li>
-                  <Link href="/services/" className="hover:text-white">
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/property-types/" className="hover:text-white">
-                    Property Types
-                  </Link>
-                </li>
-                <li>
-                  <Link href={LOCATIONS_ROUTE} className="hover:text-white">
-                    Locations
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">Compliance</p>
-              <ul className="mt-4 space-y-2 text-sm text-white/70">
-                {irsLinks.map((link) => (
-                  <li key={link.label}>
-                    <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-white">
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-4 text-sm text-white/70">
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#3B82F6]">Contact</p>
-              <a href={phoneNumberHref} className="flex items-center gap-2 text-white hover:text-[#3B82F6]">
-                <PhoneCall className="h-4 w-4" aria-hidden />
-                {phoneNumberDisplay}
-              </a>
-              <p>CA DRE and intermediary partners available by appointment.</p>
-              <p>Educational content only. Work with your CPA and attorney for formal tax and legal advice.</p>
-            </div>
-          </div>
-          <div className="border-t border-white/10 px-6 py-6 text-center text-xs text-white/50">
-            © {new Date().getFullYear()} 1031 Exchange San Jose. All rights reserved.
-          </div>
-        </footer>
       </div>
+
+      {/* JSON-LD Scripts */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(professionalServiceJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
     </>
   );

@@ -335,16 +335,25 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
     }
   };
 
+  // Common input styles
+  const inputStyles = darkMode
+    ? "w-full border border-white/20 bg-white/10 px-4 py-3 text-sm text-white placeholder:text-white/50 focus:border-lime focus:outline-none focus:ring-2 focus:ring-lime/40"
+    : "w-full border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20";
+
+  const labelStyles = darkMode
+    ? "block text-sm font-medium mb-2 text-white"
+    : "block text-sm font-medium mb-2 text-navy";
+
   if (isSubmitted) {
     return (
-      <div className="rounded-3xl border border-[#E5E7EB] bg-white p-8 shadow-lg text-center">
-        <div className="w-16 h-16 bg-[#3B82F6]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className={`border ${darkMode ? 'border-white/20 bg-white/10' : 'border-gray-200 bg-white'} p-8 text-center`}>
+        <div className={`w-16 h-16 ${darkMode ? 'bg-lime/20' : 'bg-lime/10'} flex items-center justify-center mx-auto mb-6`}>
+          <svg className={`w-8 h-8 ${darkMode ? 'text-lime' : 'text-lime-dark'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-2xl font-semibold text-[#0F172A] mb-4">Thank You!</h2>
-        <p className="text-lg text-[#4B5563] mb-8">
+        <h2 className={`font-heading text-2xl ${darkMode ? 'text-white' : 'text-navy'} mb-4`}>Thank You!</h2>
+        <p className={`text-lg ${darkMode ? 'text-white/80' : 'text-gray-600'} mb-8`}>
           We've received your message and will get back to you within one business day.
         </p>
       </div>
@@ -355,8 +364,8 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
     <div className={`${className}`}>
       {showHeading && (
         <>
-          <h1 className="text-3xl font-semibold text-[#0F172A] mb-6">Contact Us</h1>
-          <p className="text-[#4B5563] mb-8">
+          <h1 className={`font-heading text-3xl ${darkMode ? 'text-white' : 'text-navy'} mb-6`}>Contact Us</h1>
+          <p className={`${darkMode ? 'text-white/70' : 'text-gray-600'} mb-8`}>
             Tell us about your 1031 exchange needs. We'll help you identify replacement properties and coordinate the exchange process.
           </p>
         </>
@@ -365,7 +374,7 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="name" className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-[#0F172A]'}`}>
+          <label htmlFor="name" className={labelStyles}>
               Name *
           </label>
           <input
@@ -373,14 +382,14 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
             id="name"
             value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-            className="w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] px-4 py-3 text-sm text-[#111827] focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40"
+            className={inputStyles}
               required
           />
             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
         </div>
 
         <div>
-          <label htmlFor="company" className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-[#0F172A]'}`}>
+          <label htmlFor="company" className={labelStyles}>
             Company
           </label>
           <input
@@ -388,14 +397,14 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
             id="company"
             value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
-            className="w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] px-4 py-3 text-sm text-[#111827] focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40"
+            className={inputStyles}
           />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="email" className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-[#0F172A]'}`}>
+          <label htmlFor="email" className={labelStyles}>
               Email *
           </label>
           <input
@@ -403,14 +412,14 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
             id="email"
             value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-            className="w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] px-4 py-3 text-sm text-[#111827] focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40"
+            className={inputStyles}
               required
           />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
         </div>
 
         <div>
-          <label htmlFor="phone" className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-[#0F172A]'}`}>
+          <label htmlFor="phone" className={labelStyles}>
               Phone *
           </label>
           <input
@@ -418,7 +427,7 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
             id="phone"
             value={formData.phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
-            className="w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] px-4 py-3 text-sm text-[#111827] focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40"
+            className={inputStyles}
               required
           />
             {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
@@ -426,14 +435,14 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
         </div>
 
         <div>
-          <label htmlFor="projectType" className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-[#0F172A]'}`}>
+          <label htmlFor="projectType" className={labelStyles}>
             Project Type *
           </label>
           <select
             id="projectType"
             value={formData.projectType}
             onChange={(e) => handleInputChange('projectType', e.target.value)}
-            className="w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] px-4 py-3 text-sm text-[#111827] focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40"
+            className={inputStyles}
             required
           >
             <option value="">Select a project type</option>
@@ -445,14 +454,14 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
         </div>
 
         <div>
-          <label htmlFor="timeline" className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-[#0F172A]'}`}>
+          <label htmlFor="timeline" className={labelStyles}>
             Timeline
           </label>
           <select
             id="timeline"
             value={formData.timeline}
             onChange={(e) => handleInputChange('timeline', e.target.value)}
-            className="w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] px-4 py-3 text-sm text-[#111827] focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40"
+            className={inputStyles}
           >
             <option value="">Select timeline</option>
             <option value="Immediate">Immediate</option>
@@ -464,7 +473,7 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
         </div>
 
         <div>
-          <label htmlFor="details" className={`block text-sm font-medium mb-2 ${darkMode ? 'text-white' : 'text-[#0F172A]'}`}>
+          <label htmlFor="details" className={labelStyles}>
             Details
           </label>
           <textarea
@@ -473,13 +482,13 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
             onChange={(e) => handleInputChange('details', e.target.value)}
             rows={6}
             placeholder="Tell us about your current property, desired replacement property types, budget, and any specific requirements..."
-            className="w-full rounded-2xl border border-[#E5E7EB] bg-[#F3F4F6] px-4 py-3 text-sm text-[#111827] focus:border-[#3B82F6] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/40 resize-vertical"
+            className={`${inputStyles} resize-vertical`}
           />
           {errors.details && <p className="text-red-500 text-sm mt-1">{errors.details}</p>}
         </div>
 
         {submitError && (
-          <div className="border border-red-500/40 bg-red-500/10 p-4 rounded-lg">
+          <div className="border border-red-500/40 bg-red-500/10 p-4">
             <p className="text-red-500 text-sm">{submitError}</p>
           </div>
         )}
@@ -494,13 +503,17 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
         <button
           type="submit"
           disabled={isSubmitting || !!(siteKey && !turnstileReady)}
-          className="w-full rounded-full bg-[#3B82F6] px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed"
+          className={`w-full px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+            darkMode
+              ? 'bg-lime text-navy-dark hover:bg-lime-light'
+              : 'bg-navy text-white hover:bg-navy-light'
+          }`}
         >
           {isSubmitting ? 'Sending...' : 'Submit'}
         </button>
       </form>
 
-      <p className={`mt-6 text-xs ${darkMode ? 'text-white/70' : 'text-[#4B5563]'}`}>
+      <p className={`mt-6 text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>
         Educational content only. Not tax or legal advice. A California 1031 intermediary will confirm identity before
         collecting additional information.
       </p>
