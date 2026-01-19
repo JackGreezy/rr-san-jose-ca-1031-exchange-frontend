@@ -64,14 +64,16 @@ export default async function LocationPage({ params }: Props) {
     <div className="bg-white text-gray-900 min-h-screen">
       {/* Hero Section */}
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        <Image
-          src={location.heroImage}
-          alt={`${location.name} skyline`}
-          fill
-          sizes="100vw"
-          className="object-cover"
-          priority
-        />
+        {location.heroImage && (
+          <Image
+            src={location.heroImage}
+            alt={`${location.name} skyline`}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        )}
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
           <p className="text-[11px] font-light uppercase tracking-[0.4em] text-white/60 mb-8">
@@ -111,13 +113,15 @@ export default async function LocationPage({ params }: Props) {
                 />
               </div>
               <div className="relative h-80 lg:h-full lg:min-h-[400px]">
-                <Image
-                  src={location.heroImage}
-                  alt={location.name}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="object-cover"
-                />
+                {location.heroImage && (
+                  <Image
+                    src={location.heroImage}
+                    alt={location.name}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                  />
+                )}
               </div>
             </div>
           )}
@@ -189,13 +193,15 @@ export default async function LocationPage({ params }: Props) {
                   href={loc.route}
                   className="group relative h-48 overflow-hidden"
                 >
-                  <Image
-                    src={loc.heroImage}
-                    alt={loc.name}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                  {loc.heroImage && (
+                    <Image
+                      src={loc.heroImage}
+                      alt={loc.name}
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <h3 className="text-sm text-white uppercase tracking-[0.15em] font-light">
