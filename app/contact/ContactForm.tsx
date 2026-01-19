@@ -70,12 +70,11 @@ type FormErrors = Partial<Record<keyof FormData, string>>;
 
 type ContactFormProps = {
   onSuccess?: () => void;
-  showHeading?: boolean;
   className?: string;
   darkMode?: boolean;
 };
 
-function ContactFormContent({ onSuccess, showHeading = false, className = '', darkMode = false }: ContactFormProps) {
+function ContactFormContent({ onSuccess, className = '', darkMode = false }: ContactFormProps) {
   const searchParams = useSearchParams();
   const captchaRef = useRef<HTMLDivElement | null>(null);
   const [formData, setFormData] = useState<FormData>({
@@ -236,24 +235,35 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
   };
 
+  // San Jose design system - clean, minimal
+  const inputBase = "w-full border-b bg-transparent py-3 text-sm focus:outline-none transition-colors";
+  const labelBase = "block text-xs font-medium uppercase tracking-[0.15em] mb-2";
+  
   const inputStyles = darkMode
-    ? "w-full border border-white/20 bg-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder:text-white/50 focus:border-lime focus:outline-none focus:ring-2 focus:ring-lime/40"
-    : "w-full border border-gray-200 bg-white rounded-lg px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20";
+    ? `${inputBase} border-white/20 text-white placeholder:text-white/50 focus:border-lime`
+    : `${inputBase} border-gray-200 text-gray-900 placeholder:text-gray-400 focus:border-gray-900`;
 
-  const labelStyles = darkMode ? "block text-sm font-medium mb-2 text-white" : "block text-sm font-medium mb-2 text-navy";
-  const hintStyles = darkMode ? "text-xs text-white/50 mt-1" : "text-xs text-gray-500 mt-1";
+  const selectStyles = darkMode
+    ? `${inputBase} border-white/20 text-white bg-transparent focus:border-lime`
+    : `${inputBase} border-gray-200 text-gray-900 bg-white focus:border-gray-900`;
+
+  const labelStyles = darkMode 
+    ? `${labelBase} text-white/60` 
+    : `${labelBase} text-gray-400`;
+  
+  const hintStyles = darkMode ? "text-xs text-white/50 mt-1" : "text-xs text-gray-400 mt-1";
 
   if (isSubmitted) {
     return (
-      <div className={`border rounded-lg p-8 text-center ${darkMode ? 'border-white/20 bg-white/10' : 'border-gray-200 bg-white'}`}>
-        <div className={`w-16 h-16 ${darkMode ? 'bg-lime/20' : 'bg-green-100'} rounded-full flex items-center justify-center mx-auto mb-6`}>
-          <svg className={`w-8 h-8 ${darkMode ? 'text-lime' : 'text-green-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className={`border p-8 text-center ${darkMode ? 'border-white/20 bg-white/5' : 'border-gray-200 bg-gray-50'} ${className}`}>
+        <div className={`w-16 h-16 ${darkMode ? 'bg-lime/20' : 'bg-gray-100'} flex items-center justify-center mx-auto mb-6`}>
+          <svg className={`w-8 h-8 ${darkMode ? 'text-lime' : 'text-gray-900'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className={`text-2xl font-semibold ${darkMode ? 'text-white' : 'text-navy'} mb-4`}>Thank You!</h2>
-        <p className={`${darkMode ? 'text-white/80' : 'text-gray-600'}`}>
-          We've received your inquiry. A San Jose exchange specialist will contact you within one business day.
+        <h2 className={`text-2xl font-light ${darkMode ? 'text-white' : 'text-gray-900'} mb-4`}>Thank You</h2>
+        <p className={`${darkMode ? 'text-white/80' : 'text-gray-500'} font-light`}>
+          A San Jose exchange specialist will contact you within one business day.
         </p>
       </div>
     );
@@ -261,79 +271,76 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
 
   return (
     <div className={className}>
-      {showHeading && (
-        <>
-          <h1 className={`text-3xl font-semibold ${darkMode ? 'text-white' : 'text-navy'} mb-6`}>Start Your Exchange Plan</h1>
-          <p className={`${darkMode ? 'text-white/70' : 'text-gray-600'} mb-8`}>
-            Tell us about your 1031 exchange needs. We'll help you identify replacement properties and coordinate the exchange process.
-          </p>
-        </>
-      )}
+      <div className="mb-8">
+        <p className="text-xs font-light uppercase tracking-[0.3em] text-gray-400 mb-3">Start Your Exchange</p>
+        <h2 className={`text-2xl font-light tracking-wide ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+          Start Your Exchange Plan
+        </h2>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Name */}
-        <div>
-          <label htmlFor="name" className={labelStyles}>Name <span className="text-blue-500">*</span></label>
-          <input type="text" id="name" value={formData.name} onChange={handleChange('name')} 
-            placeholder="Primary investor or advisor name" className={inputStyles} required />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+        {/* Row 1: Name + Email */}
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label htmlFor="name" className={labelStyles}>Name <span className="text-gray-900">*</span></label>
+            <input type="text" id="name" value={formData.name} onChange={handleChange('name')}
+              placeholder="Primary investor or advisor name" className={inputStyles} required />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+          </div>
+          <div>
+            <label htmlFor="email" className={labelStyles}>Email <span className="text-gray-900">*</span></label>
+            <input type="email" id="email" value={formData.email} onChange={handleChange('email')}
+              placeholder="We send a confirmation and checklist" className={inputStyles} required />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          </div>
         </div>
 
-        {/* Email */}
-        <div>
-          <label htmlFor="email" className={labelStyles}>Email <span className="text-blue-500">*</span></label>
-          <input type="email" id="email" value={formData.email} onChange={handleChange('email')}
-            placeholder="We send a confirmation and documentation checklist" className={inputStyles} required />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-        </div>
-
-        {/* Phone */}
-        <div>
-          <label htmlFor="phone" className={labelStyles}>Phone <span className="text-blue-500">*</span></label>
-          <input type="tel" id="phone" value={formData.phone} onChange={handleChange('phone')}
-            placeholder="We confirm timelines by phone within one business day" className={inputStyles} required />
-          {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-        </div>
-
-        {/* Company */}
-        <div>
-          <label htmlFor="company" className={labelStyles}>Company</label>
-          <input type="text" id="company" value={formData.company} onChange={handleChange('company')}
-            placeholder="Company or organization name (optional)" className={inputStyles} />
+        {/* Row 2: Phone + Company */}
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label htmlFor="phone" className={labelStyles}>Phone <span className="text-gray-900">*</span></label>
+            <input type="tel" id="phone" value={formData.phone} onChange={handleChange('phone')}
+              placeholder="We confirm timelines within one business day" className={inputStyles} required />
+            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+          </div>
+          <div>
+            <label htmlFor="company" className={labelStyles}>Company</label>
+            <input type="text" id="company" value={formData.company} onChange={handleChange('company')}
+              placeholder="Company or organization (optional)" className={inputStyles} />
+          </div>
         </div>
 
         {/* Service */}
         <div>
-          <label htmlFor="projectType" className={labelStyles}>Service <span className="text-blue-500">*</span></label>
-          <select id="projectType" value={formData.projectType} onChange={handleChange('projectType')} className={inputStyles} required>
+          <label htmlFor="projectType" className={labelStyles}>Service <span className="text-gray-900">*</span></label>
+          <select id="projectType" value={formData.projectType} onChange={handleChange('projectType')} className={selectStyles} required>
             <option value="">Select the service you are interested in</option>
             {allServices.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
           {errors.projectType && <p className="text-red-500 text-xs mt-1">{errors.projectType}</p>}
         </div>
 
-        {/* City */}
-        <div>
-          <label htmlFor="city" className={labelStyles}>City</label>
-          <input type="text" id="city" value={formData.city} onChange={handleChange('city')}
-            placeholder="Primary metro or submarket (optional)" className={inputStyles} />
-        </div>
-
-        {/* Timeline */}
-        <div>
-          <label htmlFor="timeline" className={labelStyles}>Timeline</label>
-          <select id="timeline" value={formData.timeline} onChange={handleChange('timeline')} className={inputStyles}>
-            <option value="">Select timeline (optional)</option>
-            {timelineOptions.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <p className={hintStyles}>When do you plan to start your exchange?</p>
+        {/* Row 3: City + Timeline */}
+        <div className="grid gap-5 md:grid-cols-2">
+          <div>
+            <label htmlFor="city" className={labelStyles}>City</label>
+            <input type="text" id="city" value={formData.city} onChange={handleChange('city')}
+              placeholder="Primary metro or submarket (optional)" className={inputStyles} />
+          </div>
+          <div>
+            <label htmlFor="timeline" className={labelStyles}>Timeline</label>
+            <select id="timeline" value={formData.timeline} onChange={handleChange('timeline')} className={selectStyles}>
+              <option value="">Select timeline (optional)</option>
+              {timelineOptions.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
         </div>
 
         {/* Property Being Sold */}
         <div>
           <label htmlFor="property" className={labelStyles}>Property Being Sold</label>
           <input type="text" id="property" value={formData.property} onChange={handleChange('property')}
-            placeholder="Include property type, location, and estimated value (optional)" className={inputStyles} />
+            placeholder="Property type, location, and estimated value (optional)" className={inputStyles} />
         </div>
 
         {/* Estimated Close Date */}
@@ -347,30 +354,30 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
         <div>
           <label htmlFor="message" className={labelStyles}>Message</label>
           <textarea id="message" value={formData.message} onChange={handleChange('message')} rows={4}
-            placeholder="Outline goals, replacement preferences, or coordination needs (optional)" className={inputStyles} />
+            placeholder="Outline goals, replacement preferences, or coordination needs (optional)" className={`${inputStyles} resize-none`} />
         </div>
 
         {submitError && (
-          <div className="border border-red-500/40 bg-red-500/10 rounded-lg p-4">
+          <div className="border border-red-500/40 bg-red-500/10 p-4">
             <p className="text-red-500 text-sm">{submitError}</p>
           </div>
         )}
 
         {siteKey && (
-          <div className="flex justify-center">
+          <div className="flex justify-start">
             <div ref={captchaRef} className="min-h-[78px]" />
           </div>
         )}
 
         <button type="submit" disabled={isSubmitting || !!(siteKey && !turnstileReady)}
-          className={`w-full rounded-lg px-6 py-4 text-sm font-semibold uppercase tracking-wider transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-            darkMode ? 'bg-lime text-navy-dark hover:bg-lime-light' : 'bg-navy text-white hover:bg-navy-light'
+          className={`w-full py-4 text-xs font-medium uppercase tracking-[0.2em] transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+            darkMode ? 'bg-lime text-gray-900 hover:bg-lime-light' : 'bg-gray-900 text-white hover:bg-gray-800'
           }`}>
-          {isSubmitting ? 'Submitting...' : 'Submit Request'}
+          {isSubmitting ? 'Sending...' : 'Send Message'}
         </button>
       </form>
 
-      <p className={`mt-6 text-xs ${darkMode ? 'text-white/60' : 'text-gray-500'}`}>
+      <p className={`mt-6 text-xs ${darkMode ? 'text-white/60' : 'text-gray-400'}`}>
         Consult your QI, CPA, and legal counsel before executing exchange strategies.
       </p>
     </div>
