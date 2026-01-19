@@ -271,12 +271,12 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
       const phoneDigits = formData.phone.replace(/\D/g, '');
 
       // Submit to API
-      const response = await fetch('/api/submit', {
+      const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-      body: JSON.stringify({
+        body: JSON.stringify({
           name: formData.name,
           company: formData.company,
           email: formData.email,
@@ -284,9 +284,9 @@ function ContactFormContent({ onSuccess, showHeading = false, className = '', da
           projectType: formData.projectType,
           timeline: formData.timeline,
           details: formData.details,
-          'cf-turnstile-response': turnstileToken,
-      }),
-    });
+          turnstileToken: turnstileToken,
+        }),
+      });
 
     if (response.ok) {
         // Reset form

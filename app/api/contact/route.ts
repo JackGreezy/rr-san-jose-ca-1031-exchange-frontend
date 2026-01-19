@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Webhook configuration error' }, { status: 500, headers: stdHeaders })
     }
 
+    // Honeypot check - if you add a honeypot field in the future, check it here
+    // Currently not using honeypot since 'company' is a legitimate field
+
     const payload = {
       ...body,
       projectType: getProjectTypeFromSite('rr-san-jose-ca-1031-exchange'),
@@ -55,12 +58,12 @@ export async function POST(request: NextRequest) {
       // helpful tracing for Zapier
       _meta: {
         site: 'rr-san-jose-ca-1031-exchange',
-        route: '/api/submit',
+        route: '/api/contact',
       },
     }
 
     // Verify Turnstile - REQUIRED
-    const token = body['cf-turnstile-response'];
+    const token = body['cf-turnstile-response'] || body['turnstileToken'];
     if (!token) {
       console.error("Missing captcha token in request");
       return NextResponse.json({ error: 'Captcha token missing' }, { status: 400, headers: stdHeaders });
@@ -147,6 +150,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500, headers: stdHeaders })
   }
 }
-
-
-
