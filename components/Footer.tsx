@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { servicesData } from "../data/services";
+import { locationsData } from "../data/locations";
 import { LOCATIONS_ROUTE } from "../lib/config";
 
 const phoneNumberDisplay = "(408) 539-2254";
@@ -22,13 +23,15 @@ const tools = [
 ];
 
 export default function Footer() {
+  const mapEmbedUrl = `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+
   return (
     <footer className="bg-navy text-white">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16 lg:py-20">
-        <div className="grid gap-12 lg:grid-cols-12">
+        <div className="grid gap-12 lg:grid-cols-5">
           {/* Logo & Contact Info */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-1 space-y-6">
             {/* Logo - Two lines, elegant like header */}
             <Link href="/" className="inline-block">
               <div className="flex flex-col leading-tight">
@@ -67,7 +70,7 @@ export default function Footer() {
           </div>
           
           {/* Quick Links */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/40 mb-6">
               Quick Links
             </p>
@@ -86,7 +89,7 @@ export default function Footer() {
         </div>
 
           {/* Services */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-1">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/40 mb-6">
               Services
             </p>
@@ -112,8 +115,35 @@ export default function Footer() {
           </ul>
         </div>
 
+          {/* Locations */}
+          <div className="lg:col-span-1">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/40 mb-6">
+              Locations
+            </p>
+            <ul className="space-y-3">
+              {locationsData.slice(0, 8).map((location) => (
+                <li key={location.slug}>
+                  <Link
+                    href={location.route}
+                    className="text-white/80 hover:text-white transition-colors text-sm font-light"
+                  >
+                    {location.name}
+                  </Link>
+                </li>
+              ))}
+              <li className="pt-2">
+                <Link
+                  href={LOCATIONS_ROUTE}
+                  className="text-white hover:text-white/70 transition-colors text-xs font-medium uppercase tracking-[0.15em]"
+                >
+                  View All Locations
+                </Link>
+              </li>
+            </ul>
+          </div>
+
           {/* Tools */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-1">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-white/40 mb-6">
               Exchange Tools
             </p>
@@ -178,6 +208,24 @@ export default function Footer() {
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Google Maps Embed */}
+      <div className="border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
+          <div className="w-full h-64 rounded-lg overflow-hidden border border-white/20">
+            <iframe
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              src={mapEmbedUrl}
+              title="Office Location Map"
+            />
           </div>
         </div>
       </div>
