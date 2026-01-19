@@ -3,9 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { inventoryCategories } from "../../../data/inventory-categories";
-import { inventoryBatches01 as inventoryBatches } from "../../../data";
+import { servicesData } from "../../../data/services";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { propertyTypesData } from "../../../data/property-types";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -28,47 +27,75 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${category.name} | San Jose 1031 Exchange Properties`,
-    description: `Browse ${category.name.toLowerCase()} properties for 1031 exchange opportunities in Silicon Valley`,
+    title: `${category.name} Properties | San Jose 1031 Exchange`,
+    description: `Browse ${category.name.toLowerCase()} properties for 1031 exchange opportunities in Silicon Valley. Tax-deferred investment options available.`,
     alternates: {
       canonical: `https://www.1031exchangesanjose.com${category.route}`,
     },
   };
 }
 
-const propertyTypeDescriptions: Record<string, string> = {
-  "convenience-store-gas-c-store":
-    "Single tenant convenience stores and gas stations with credit rated tenants offer stable, long-term income with minimal landlord responsibilities. These properties typically feature triple-net (NNN) leases with national brands.",
-  "drive-thru-qsr":
-    "Drive-thru quick service restaurants with national brands like McDonald's, Chick-fil-A, and Taco Bell provide recession-resistant income streams with corporate-backed lease guarantees.",
-  pharmacy:
-    "Single tenant pharmacy properties anchored by CVS, Walgreens, or Rite Aid offer essential retail characteristics with strong credit tenants and long-term lease commitments.",
-  "dollar-store":
-    "Dollar General, Dollar Tree, and Family Dollar properties provide defensive retail exposure with essential goods focus and consistent consumer demand regardless of economic conditions.",
-  "coffee-drive-thru":
-    "Single tenant coffee drive-thru properties with brands like Starbucks, Dutch Bros, and Scooter's Coffee benefit from habitual consumer behavior and drive-thru convenience trends.",
-  "auto-parts-retail":
-    "Auto parts retail properties with tenants like AutoZone, O'Reilly, and Advance Auto Parts serve the essential automotive aftermarket with strong credit profiles.",
-  "hard-discount-grocer":
-    "Hard discount grocers like Aldi and Lidl offer internet-resistant retail with essential goods focus and growing consumer preference for value-oriented shopping.",
-  "ground-lease-outparcel":
-    "Ground lease outparcel properties provide land ownership with tenant-owned improvements, offering the most passive investment structure with long-term income security.",
-  "urgent-care-medical-clinic":
-    "Urgent care and medical clinic properties serve essential healthcare needs with strong tenant credit and growing demand for convenient, accessible medical services.",
-  "veterinary-clinic":
-    "Veterinary clinic properties benefit from the growing pet industry with recession-resistant consumer spending on pet healthcare services.",
-  "auto-service-oil-change":
-    "Auto service and oil change properties with brands like Jiffy Lube, Valvoline, and Take 5 serve essential vehicle maintenance needs with quick-service formats.",
-  "tire-store":
-    "Single tenant tire store properties with Discount Tire, Big O Tires, and Les Schwab serve essential automotive needs with strong regional and national brands.",
-  "last-mile-logistics-flex":
-    "Last mile logistics and flex properties serve e-commerce distribution needs with growing demand from Amazon, FedEx, and other delivery networks.",
-  "specialty-grocer":
-    "Specialty grocer properties with Trader Joe's, Sprouts, and Whole Foods serve affluent demographics with differentiated product offerings and loyal customer bases.",
-  "telecom-wireless-retail":
-    "Telecom and wireless retail properties with Verizon, AT&T, and T-Mobile stores serve essential communication needs with strong corporate credit backing.",
-  "dental-orthodontics":
-    "Dental and orthodontics properties serve essential healthcare needs with stable patient bases and growing demand for cosmetic and corrective dental services.",
+const propertyTypeDescriptions: Record<string, { description: string; benefits: string[]; examples: string[] }> = {
+  "nnn-triple-net": {
+    description: "Triple Net (NNN) lease properties offer investors truly passive income with tenants responsible for all operating expenses including taxes, insurance, and maintenance. These investments feature credit-rated tenants, long-term leases, and predictable cash flows ideal for 1031 exchanges.",
+    benefits: ["Passive income with no landlord responsibilities", "Credit-rated national tenants", "Long-term lease security (10-25 years)", "Built-in rent escalations"],
+    examples: ["Walgreens", "CVS", "Dollar General", "Starbucks", "McDonald's", "7-Eleven"],
+  },
+  "retail": {
+    description: "Retail properties encompass a wide range of commercial real estate from single-tenant stores to shopping centers. These investments benefit from consumer spending patterns and can include everything from neighborhood centers to power centers and lifestyle destinations.",
+    benefits: ["Diverse tenant mix options", "Consumer spending exposure", "Location-driven value", "Visibility and signage benefits"],
+    examples: ["Shopping Centers", "Strip Malls", "Single Tenant Retail", "Outlet Centers", "Neighborhood Centers"],
+  },
+  "residential": {
+    description: "Residential properties for 1031 exchanges include single-family rentals, duplexes, and small apartment buildings. These investments benefit from strong rental demand, appreciation potential, and favorable financing options in the Silicon Valley market.",
+    benefits: ["Strong rental demand", "Appreciation potential", "Favorable financing terms", "Diverse tenant pool"],
+    examples: ["Single Family Rentals", "Duplexes", "Triplexes", "Fourplexes", "Small Apartments"],
+  },
+  "commercial": {
+    description: "Commercial properties encompass office buildings, retail spaces, and mixed-use developments. These investments offer stable income streams from business tenants with longer lease terms and professional management opportunities.",
+    benefits: ["Professional tenant relationships", "Longer lease terms", "Triple net lease options", "Business-critical locations"],
+    examples: ["Office Buildings", "Retail Centers", "Business Parks", "Professional Buildings"],
+  },
+  "industrial": {
+    description: "Industrial properties include warehouses, distribution centers, and manufacturing facilities. With the rise of e-commerce and supply chain optimization, industrial real estate has become one of the strongest performing sectors for 1031 exchanges.",
+    benefits: ["E-commerce growth driver", "Low tenant turnover", "Triple net lease structures", "Mission-critical facilities"],
+    examples: ["Warehouses", "Distribution Centers", "Flex Industrial", "Manufacturing", "Last Mile Logistics"],
+  },
+  "multifamily": {
+    description: "Multifamily properties offer investors diversified income streams from multiple residential units. From garden-style apartments to mid-rise buildings, these investments benefit from strong housing demand and various value-add opportunities.",
+    benefits: ["Multiple income streams", "Economies of scale", "Value-add potential", "Strong rental demand"],
+    examples: ["Garden Apartments", "Mid-Rise Buildings", "Student Housing", "Senior Housing", "Workforce Housing"],
+  },
+  "office": {
+    description: "Office properties range from single-tenant buildings to Class A high-rises. Despite evolving work patterns, well-located office investments with quality tenants continue to provide stable income and appreciation potential.",
+    benefits: ["Long-term lease commitments", "Professional tenants", "Central business locations", "Amenity-rich environments"],
+    examples: ["Class A Office", "Suburban Office", "Medical Office", "Creative Office", "Flex Office"],
+  },
+  "land": {
+    description: "Land investments offer unique 1031 exchange opportunities for investors seeking development potential or long-term appreciation. Raw land, entitled parcels, and infill sites all qualify as like-kind real estate.",
+    benefits: ["Development potential", "Long-term appreciation", "No depreciation recapture", "Flexible exit strategies"],
+    examples: ["Raw Land", "Entitled Land", "Infill Sites", "Agricultural Land", "Development Sites"],
+  },
+  "mixed-use": {
+    description: "Mixed-use properties combine retail, office, and residential components in single developments. These investments benefit from diversified income streams and often occupy prime urban locations with strong fundamentals.",
+    benefits: ["Diversified income streams", "Prime urban locations", "Live-work-play appeal", "Reduced vacancy risk"],
+    examples: ["Retail with Apartments Above", "Office over Retail", "Live-Work Spaces", "Urban Infill Projects"],
+  },
+  "medical": {
+    description: "Medical office and healthcare properties serve the growing healthcare industry with specialized facilities for physicians, outpatient services, and specialty care. These investments benefit from aging demographics and healthcare spending growth.",
+    benefits: ["Recession-resistant demand", "Aging demographics driver", "Specialized tenant improvements", "Long-term lease commitments"],
+    examples: ["Medical Office Buildings", "Outpatient Clinics", "Urgent Care Centers", "Dental Practices", "Surgery Centers"],
+  },
+  "hospitality": {
+    description: "Hospitality properties include hotels, motels, and extended-stay facilities. While more management-intensive, these investments offer unique income potential and can qualify for 1031 exchanges when held for investment purposes.",
+    benefits: ["Revenue per room potential", "Brand affiliation options", "Tourism and business travel", "Operational upside"],
+    examples: ["Limited Service Hotels", "Extended Stay", "Boutique Hotels", "Select Service Hotels"],
+  },
+  "self-storage": {
+    description: "Self-storage facilities have become one of the most resilient real estate sectors with consistent demand through economic cycles. These investments offer low operating costs, minimal tenant improvements, and recession-resistant income streams.",
+    benefits: ["Recession-resistant demand", "Low operating costs", "Minimal tenant improvements", "Month-to-month leases"],
+    examples: ["Climate Controlled Storage", "Drive-Up Storage", "Boat & RV Storage", "Urban Self Storage"],
+  },
 };
 
 export default async function InventoryPage({ params }: Props) {
@@ -79,12 +106,15 @@ export default async function InventoryPage({ params }: Props) {
     notFound();
   }
 
-  const batchData = (inventoryBatches.inventorySpotlight01 as Array<{ type: string; copy: string }>).find(
-    (item) => item.type === slug
-  );
+  const typeInfo = propertyTypeDescriptions[slug] || {
+    description: `${category.name} properties qualify as like-kind real estate for 1031 exchanges, offering investors stable income and tax-deferred wealth building opportunities in Silicon Valley.`,
+    benefits: ["Tax-deferred exchange eligible", "Stable income potential", "Professional management options", "Appreciation opportunity"],
+    examples: ["Various property subtypes available"],
+  };
 
   // Get related property types
-  const relatedTypes = propertyTypesData.filter((t) => t.slug !== slug).slice(0, 4);
+  const relatedTypes = inventoryCategories.filter((t) => t.slug !== slug).slice(0, 4);
+  const relatedServices = servicesData.slice(0, 4);
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
@@ -92,15 +122,14 @@ export default async function InventoryPage({ params }: Props) {
     { label: category.name },
   ];
 
-  const description = propertyTypeDescriptions[slug] || 
-    `${category.name} properties qualify as like-kind real estate for 1031 exchanges, offering investors stable income and tax-deferred wealth building opportunities.`;
+  const heroImage = category.heroImage || "/locations/san-jose-1031-exchange.jpg";
 
   return (
     <div className="bg-white text-gray-900 min-h-screen">
-      {/* Hero Section - Matching main page style */}
+      {/* Hero Section - Same style as locations */}
       <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center overflow-hidden">
         <Image
-          src={`/inventory/${slug}-1031-exchange.jpg`}
+          src={heroImage}
           alt={`${category.name} properties for 1031 exchange`}
           fill
           sizes="100vw"
@@ -109,28 +138,21 @@ export default async function InventoryPage({ params }: Props) {
         />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-          {/* Small top text */}
           <p className="text-[11px] font-light uppercase tracking-[0.4em] text-white/60 mb-8">
             Property Type
           </p>
-          
-          {/* Large elegant title */}
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-light tracking-[0.1em] leading-tight">
+          <h1 className="font-heading text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-light tracking-[0.1em] leading-none">
             {category.name.toUpperCase()}
           </h1>
-          
-          {/* Subtitle */}
-          <p className="mt-8 text-[13px] uppercase tracking-[0.25em] text-white/70 font-light max-w-2xl mx-auto">
-            1031 Exchange Qualified Properties
+          <p className="mt-10 text-[13px] uppercase tracking-[0.25em] text-white/70 font-light">
+            1031 Exchange Properties + California
           </p>
-          
-          {/* CTA Button */}
           <div className="mt-12">
             <Link
               href={`/contact?projectType=${encodeURIComponent(category.name)}`}
               className="inline-flex items-center justify-center border border-white/60 text-white px-12 py-4 text-[11px] font-light uppercase tracking-[0.3em] hover:bg-white hover:text-gray-900 transition-all duration-500"
             >
-              Explore Properties
+              Find Properties
             </Link>
           </div>
         </div>
@@ -140,24 +162,19 @@ export default async function InventoryPage({ params }: Props) {
 
       <main className="max-w-7xl mx-auto px-6 md:px-10 py-16 md:py-24">
         <article className="space-y-20">
-          {/* Main Content */}
+          {/* Main Content - Same layout as locations */}
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             <div className="space-y-8">
               <h2 className="text-2xl md:text-3xl text-gray-900 font-light tracking-wide">
-                About {category.name}
+                {category.name} for 1031 Exchanges
               </h2>
               <p className="text-gray-500 leading-relaxed font-light text-lg">
-                {description}
+                {typeInfo.description}
               </p>
-              {batchData && (
-                <p className="text-gray-500 leading-relaxed font-light">
-                  {batchData.copy}
-                </p>
-              )}
             </div>
             <div className="relative h-80 lg:h-full lg:min-h-[400px]">
               <Image
-                src={`/inventory/${slug}-1031-exchange.jpg`}
+                src={heroImage}
                 alt={category.name}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -166,44 +183,57 @@ export default async function InventoryPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Key Benefits */}
+          {/* Key Benefits - Same style as locations popular paths */}
           <section className="bg-gray-50 -mx-6 md:-mx-10 px-6 md:px-10 py-16">
-            <h2 className="text-2xl md:text-3xl text-gray-900 font-light tracking-wide text-center mb-12 uppercase">
+            <h2 className="text-2xl md:text-3xl text-gray-900 font-light tracking-wide text-center uppercase mb-12">
               Investment Benefits
             </h2>
-            <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              <div className="text-center">
-                <p className="text-4xl font-light text-navy mb-4">NNN</p>
-                <p className="text-xs uppercase tracking-[0.15em] text-gray-500">Triple Net Leases</p>
-                <p className="mt-4 text-sm text-gray-500 font-light">Tenant pays taxes, insurance, and maintenance for truly passive income.</p>
-              </div>
-              <div className="text-center">
-                <p className="text-4xl font-light text-navy mb-4">10-20</p>
-                <p className="text-xs uppercase tracking-[0.15em] text-gray-500">Year Lease Terms</p>
-                <p className="mt-4 text-sm text-gray-500 font-light">Long-term leases provide income stability and predictable cash flow.</p>
-              </div>
-              <div className="text-center">
-                <p className="text-4xl font-light text-navy mb-4">1031</p>
-                <p className="text-xs uppercase tracking-[0.15em] text-gray-500">Exchange Qualified</p>
-                <p className="mt-4 text-sm text-gray-500 font-light">Like-kind real estate eligible for tax-deferred exchanges under IRC Section 1031.</p>
-              </div>
+            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+              {typeInfo.benefits.map((benefit, index) => (
+                <div
+                  key={index}
+                  className="border-t border-gray-200 pt-6"
+                >
+                  <div className="flex items-center gap-4 mb-3">
+                    <span className="text-2xl font-light text-navy">0{index + 1}</span>
+                    <p className="text-lg text-gray-900 font-normal">{benefit}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
 
-          {/* Related Property Types */}
+          {/* Property Examples */}
           <section>
             <h2 className="text-2xl md:text-3xl text-gray-900 font-light tracking-wide uppercase mb-12">
-              Related Property Types
+              Common {category.name} Types
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {typeInfo.examples.map((example, index) => (
+                <div
+                  key={index}
+                  className="bg-gray-50 p-6 text-center"
+                >
+                  <p className="text-gray-900 font-normal">{example}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Related Property Types - Same grid style as locations */}
+          <section>
+            <h2 className="text-2xl md:text-3xl text-gray-900 font-light tracking-wide uppercase mb-8">
+              Other Property Types
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {relatedTypes.map((type) => (
                 <Link
                   key={type.slug}
-                  href={`/inventory/${type.slug}`}
+                  href={type.route}
                   className="group relative h-48 overflow-hidden"
                 >
                   <Image
-                    src={`/inventory/${type.slug}-1031-exchange.jpg`}
+                    src={type.heroImage || "/locations/san-jose-1031-exchange.jpg"}
                     alt={type.name}
                     fill
                     sizes="(max-width: 768px) 50vw, 25vw"
@@ -218,15 +248,44 @@ export default async function InventoryPage({ params }: Props) {
                 </Link>
               ))}
             </div>
+            <div className="text-center mt-8">
+              <Link
+                href="/property-types"
+                className="inline-flex items-center justify-center border border-gray-900 text-gray-900 px-10 py-4 text-xs font-medium uppercase tracking-[0.2em] hover:bg-gray-900 hover:text-white transition-all duration-300"
+              >
+                View All Property Types
+              </Link>
+            </div>
           </section>
 
-          {/* CTA Section */}
+          {/* Services Section - Same as locations */}
+          <section className="bg-gray-50 -mx-6 md:-mx-10 px-6 md:px-10 py-16">
+            <h2 className="text-2xl md:text-3xl text-gray-900 font-light tracking-wide text-center uppercase mb-12">
+              Our Services
+            </h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {relatedServices.map((service) => (
+                <Link
+                  key={service.slug}
+                  href={service.route}
+                  className="group block border-t border-gray-200 pt-6 hover:border-gray-900 transition-colors duration-300"
+                >
+                  <h3 className="text-base text-gray-900 font-normal mb-3 group-hover:text-gray-600 transition-colors duration-300">
+                    {service.name}
+                  </h3>
+                  <p className="text-gray-500 text-sm font-light line-clamp-2">{service.short}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* CTA Section - Same as locations */}
           <section className="bg-navy py-16 px-8 text-center -mx-6 md:-mx-10">
             <h2 className="text-2xl md:text-3xl text-white font-light tracking-wide uppercase">
-              Ready to explore {category.name.toLowerCase()}?
+              Ready to find {category.name.toLowerCase()} properties?
             </h2>
             <p className="mt-6 text-white/70 font-light max-w-2xl mx-auto">
-              Contact us to learn more about available {category.name.toLowerCase()} properties and how we can help with your 1031 exchange.
+              Contact us to learn more about {category.name.toLowerCase()} investment opportunities and how we can help with your 1031 exchange.
             </p>
             <div className="mt-10 flex flex-wrap gap-4 justify-center">
               <Link
@@ -252,8 +311,8 @@ export default async function InventoryPage({ params }: Props) {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Product",
-            name: category.name,
-            description: description,
+            name: `${category.name} Properties`,
+            description: typeInfo.description,
             category: "Real Estate Investment",
           }),
         }}

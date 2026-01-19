@@ -15,37 +15,37 @@ const stats = [
   { value: "100%", label: "Compliance Rate" },
 ];
 
-// Property types for conveyor belt carousel
+// Property types for conveyor belt carousel - BROADER CATEGORIES
 const propertyCategories = [
   {
-    title: "Single Tenant Retail",
+    title: "NNN Triple Net",
     image: "/locations/san-jose-1031-exchange.jpg",
-    href: "/inventory/convenience-store-gas-c-store",
+    href: "/inventory/nnn-triple-net",
   },
   {
-    title: "Medical Office",
+    title: "Retail",
     image: "/locations/palo-alto-1031-exchange.jpg",
-    href: "/inventory/urgent-care-medical-clinic",
+    href: "/inventory/retail",
   },
   {
-    title: "Industrial & Logistics",
-    image: "/locations/fremont-1031-exchange.jpg",
-    href: "/inventory/last-mile-logistics-flex",
-  },
-  {
-    title: "Quick Service Restaurant",
-    image: "/locations/sunnyvale-1031-exchange.jpg",
-    href: "/inventory/drive-thru-qsr",
-  },
-  {
-    title: "Auto Service",
-    image: "/locations/santa-clara-1031-exchange.jpg",
-    href: "/inventory/auto-service-oil-change",
-  },
-  {
-    title: "Grocery & Discount",
+    title: "Residential",
     image: "/locations/mountain-view-1031-exchange.jpg",
-    href: "/inventory/hard-discount-grocer",
+    href: "/inventory/residential",
+  },
+  {
+    title: "Commercial",
+    image: "/locations/sunnyvale-1031-exchange.jpg",
+    href: "/inventory/commercial",
+  },
+  {
+    title: "Industrial",
+    image: "/locations/fremont-1031-exchange.jpg",
+    href: "/inventory/industrial",
+  },
+  {
+    title: "Multifamily",
+    image: "/locations/santa-clara-1031-exchange.jpg",
+    href: "/inventory/multifamily",
   },
 ];
 
@@ -242,7 +242,7 @@ export default function HomePage() {
               </h1>
               <h1 className="font-heading text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-white font-light tracking-[0.15em] leading-none mt-2">
                 EXCHANGE
-                    </h1>
+              </h1>
               
               {/* Subtitle */}
               <p className="mt-10 text-[13px] uppercase tracking-[0.35em] text-white/80 font-light">
@@ -251,7 +251,7 @@ export default function HomePage() {
               
               {/* CTA Button - bordered like Kim Bibb */}
               <div className="mt-14">
-                    <Link
+                <Link
                   href="/contact"
                   className="inline-flex items-center justify-center border border-white/60 text-white px-14 py-5 text-[11px] font-light uppercase tracking-[0.3em] hover:bg-white hover:text-gray-900 transition-all duration-500"
                 >
@@ -283,7 +283,7 @@ export default function HomePage() {
                     <span className="text-lg text-white uppercase tracking-[0.2em] font-light">
                       Find Properties
                     </span>
-            </div>
+                  </div>
                 </Link>
                 
                 <Link href="/contact" className="group relative block h-80 overflow-hidden">
@@ -299,7 +299,7 @@ export default function HomePage() {
                     <span className="text-lg text-white uppercase tracking-[0.2em] font-light">
                       Contact Us
                     </span>
-              </div>
+                  </div>
                 </Link>
                 
                 <Link href="/tools" className="group relative block h-80 overflow-hidden">
@@ -314,8 +314,8 @@ export default function HomePage() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-lg text-white uppercase tracking-[0.2em] font-light">
                       Exchange Tools
-                      </span>
-                </div>
+                    </span>
+                  </div>
                 </Link>
               </div>
             </div>
@@ -333,7 +333,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="flex animate-conveyor gap-6">
                 {duplicatedCategories.map((category, idx) => (
-                <Link
+                  <Link
                     key={`${category.title}-${idx}`}
                     href={category.href}
                     className="group flex-shrink-0 w-[320px]"
@@ -353,7 +353,7 @@ export default function HomePage() {
                         </h3>
                       </div>
                     </div>
-                    </Link>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -408,8 +408,8 @@ export default function HomePage() {
             <div className="py-12 md:py-16">
               <h2 className="text-3xl md:text-4xl text-gray-900 font-light tracking-wide text-center uppercase px-6">
                 Featured Locations
-                </h2>
-              </div>
+              </h2>
+            </div>
             
             {/* Edge-to-edge grid - no extra padding */}
             <div className="grid grid-cols-2 lg:grid-cols-3">
@@ -432,17 +432,17 @@ export default function HomePage() {
                       {location.name}
                     </h3>
                   </div>
-                      </Link>
-                    ))}
-                  </div>
+                </Link>
+              ))}
+            </div>
             
             <div className="text-center py-12">
-                    <Link
-                      href={LOCATIONS_ROUTE}
+              <Link
+                href={LOCATIONS_ROUTE}
                 className="inline-flex items-center justify-center border border-gray-900 text-gray-900 px-10 py-4 text-xs font-medium uppercase tracking-[0.2em] hover:bg-gray-900 hover:text-white transition-all duration-300"
               >
                 View All Locations
-                  </Link>
+              </Link>
             </div>
           </section>
 
@@ -513,12 +513,12 @@ export default function HomePage() {
                 Let us guide you through the process with precision and personalized care.
               </p>
               <div className="mt-12">
-              <Link
+                <Link
                   href="/contact"
                   className="inline-flex items-center justify-center bg-white text-gray-900 px-10 py-4 text-xs font-medium uppercase tracking-[0.2em] hover:bg-gray-100 transition-all duration-300"
-              >
+                >
                   Get Started
-              </Link>
+                </Link>
               </div>
             </div>
           </section>

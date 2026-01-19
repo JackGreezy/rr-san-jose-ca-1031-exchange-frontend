@@ -29,6 +29,7 @@ export interface InventoryCategory {
   name: string;
   route: Slug;
   note?: string;
+  heroImage?: string;
 }
 
 export interface ResourceLink {
